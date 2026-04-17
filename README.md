@@ -2,6 +2,35 @@
 
 React migration foundation for the old `Refat4_*` HTML prototype.
 
+## How to access
+
+To open the project locally:
+
+```bash
+cd "C:\Users\andre\OneDrive\Documentos\New project\edusocial-react"
+npm install
+npm run dev
+```
+
+After that, open the local URL shown by Vite in the terminal. In most cases it will be:
+
+```text
+http://localhost:5173
+```
+
+For a production preview:
+
+```bash
+npm run build
+npm run preview
+```
+
+This project is already versioned in GitHub here:
+
+[https://github.com/felipefsz/Edu](https://github.com/felipefsz/Edu)
+
+At this stage there is no public deployed site yet. The current access path is local development via Vite.
+
 ## What changed in this step
 
 - Replaced the monolithic HTML mentality with a real multi-file React app.
@@ -63,6 +92,7 @@ src/
 npm install
 npm run dev
 npm run build
+npm run preview
 ```
 
 ## Notes
