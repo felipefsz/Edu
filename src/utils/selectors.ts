@@ -149,9 +149,9 @@ export function getThreadById(state: AppState, threadId?: string | null): ChatGr
 export function getThreadMembers(state: AppState, threadId?: string | null) {
   const thread = getThreadById(state, threadId);
   if (!thread) return [];
-  const memberIds = 'members' in thread ? thread.members : thread.members;
+  const memberIds: string[] = thread.members;
   return memberIds
-    .map((memberId) => getUserById(state, memberId))
+    .map((memberId: string) => getUserById(state, memberId))
     .filter((member): member is User => Boolean(member));
 }
 
@@ -186,6 +186,13 @@ export function getVisibleTasks(state: AppState, currentUser: User | null) {
   return state.tasks.filter((task) => !task.classroom || task.classroom === currentUser.classroom);
 }
 
+export function getUpcomingTasks(state: AppState, currentUser: User | null) {
+  return getVisibleTasks(state, currentUser)
+    .slice()
+    .sort((left, right) => new Date(left.deadline).getTime() - new Date(right.deadline).getTime())
+    .slice(0, 4);
+}
+
 export function getTaskSubmission(task: Task, userId?: string | null) {
   if (!userId) return null;
   return task.submissions.find((submission) => submission.userId === userId) ?? null;
@@ -194,12 +201,36 @@ export function getTaskSubmission(task: Task, userId?: string | null) {
 export function getTeacherAnalytics(state: AppState) {
   const studentUsers = state.users.filter((user) => user.role === 'student');
   const classrooms = [...new Set(studentUsers.map((user) => user.classroom).filter(Boolean))];
+  const totalPostInteractions = state.posts.reduce(
+    (total, post) => total + post.likeUserIds.length + post.savedByUserIds.length + post.comments.length + post.repostUserIds.length,
+    0,
+  );
+  const atRiskStudents = studentUsers
+    .map((user) => ({
+      id: user.id,
+      name: user.name,
+      classroom: user.classroom,
+      average: Number(getAverageGrade(user).toFixed(1)),
+      streak: user.streak,
+    }))
+    .filter((user) => user.average < 7 || user.streak <= 2)
+    .sort((left, right) => left.average - right.average)
+    .slice(0, 4);
+  const missionCompletion = state.missions.map((mission) => ({
+    label: mission.label,
+    completion: mission.doneByUserIds.length,
+    total: studentUsers.filter((user) => user.role === mission.role).length || 1,
+  }));
 
   return {
     totalPosts: state.posts.length,
     totalTasks: state.tasks.length,
     totalNotices: state.notices.length,
     activeStreaks: studentUsers.filter((user) => user.streak >= 3).length,
+    totalPostInteractions,
+    averageEngagementPerPost: Number((totalPostInteractions / Math.max(state.posts.length, 1)).toFixed(1)),
+    atRiskStudents,
+    missionCompletion,
     classroomAverages: classrooms.map((classroom) => {
       const members = studentUsers.filter((user) => user.classroom === classroom);
       const average =
@@ -343,6 +374,13 @@ export function getNoticeHighlights(state: AppState) {
     if (!left.pinned && right.pinned) return 1;
     return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
   });
+}
+
+export function getRelevantNotices(state: AppState, currentUser: User | null) {
+  if (!currentUser || currentUser.role === 'teacher') return getNoticeHighlights(state);
+  return getNoticeHighlights(state).filter(
+    (notice) => !notice.classroom || notice.classroom === currentUser.classroom,
+  );
 }
 
 export function getStudentOverview(state: AppState, currentUser: User | null) {

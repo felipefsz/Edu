@@ -325,6 +325,12 @@ html[data-transparency='solid'] .floating-top-button {
   color: var(--text-2);
 }
 
+.ghost-button--slim {
+  width: auto;
+  min-height: 36px;
+  padding: 0 0.8rem;
+}
+
 .ghost-button--full,
 .solid-button {
   width: 100%;
@@ -385,6 +391,10 @@ html[data-transparency='solid'] .floating-top-button {
     radial-gradient(circle at top left, rgba(99, 116, 246, 0.2), transparent 34%),
     radial-gradient(circle at bottom right, rgba(31, 212, 122, 0.12), transparent 30%),
     var(--surface-1);
+}
+
+.hero-panel--feed {
+  position: relative;
 }
 
 .hero-panel__copy,
@@ -452,6 +462,32 @@ html[data-transparency='solid'] .floating-top-button {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
+}
+
+.toolbar-cluster,
+.person-stack,
+.profile-page-hero__main,
+.profile-page-hero__topline,
+.profile-inline-metrics,
+.task-student-meta {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.toolbar-cluster,
+.profile-inline-metrics,
+.task-student-meta {
+  flex-wrap: wrap;
+}
+
+.person-stack,
+.profile-page-hero__main {
+  flex-direction: column;
+}
+
+.profile-page-hero__topline {
+  align-items: flex-start;
+  justify-content: space-between;
 }
 
 .button-row--end {
@@ -630,6 +666,12 @@ html[data-transparency='solid'] .floating-top-button {
   padding: 0.95rem;
 }
 
+.list-card--notice {
+  background:
+    linear-gradient(135deg, rgba(99, 116, 246, 0.08), rgba(31, 212, 122, 0.04)),
+    var(--surface-2);
+}
+
 .comment-row {
   border-radius: var(--radius-md);
   background: var(--surface-2);
@@ -794,6 +836,11 @@ html[data-transparency='solid'] .floating-top-button {
 .task-card {
   display: grid;
   gap: 1rem;
+}
+
+.submission-card--rich {
+  display: grid;
+  gap: 0.75rem;
 }
 
 .task-card__meta {
@@ -986,6 +1033,24 @@ html[data-transparency='solid'] .floating-top-button {
   margin-top: 0.75rem;
 }
 
+.profile-inline-metrics div {
+  min-width: 100px;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  display: grid;
+  gap: 0.25rem;
+}
+
+.profile-inline-metrics strong {
+  font-size: 1.15rem;
+}
+
+.profile-inline-metrics small {
+  color: var(--text-3);
+}
+
 .floating-top-button {
   position: fixed;
   right: 1rem;
@@ -999,6 +1064,16 @@ html[data-transparency='solid'] .floating-top-button {
   color: var(--accent);
   backdrop-filter: blur(18px);
   box-shadow: var(--shadow);
+}
+
+html[data-feedDensity='compact'] .post-card,
+html[data-feedDensity='compact'] .panel-card,
+html[data-feedDensity='compact'] .task-card {
+  padding: 1rem;
+}
+
+html[data-chatDensity='compact'] .message-bubble {
+  padding: 0.75rem 0.9rem;
 }
 
 .mobile-nav {

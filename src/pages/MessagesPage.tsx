@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Settings2 } from 'lucide-react';
 import { useApp } from '../app/AppState';
+import type { User } from '../app/types';
 import {
   formatRelativeDate,
   getThreadById,
@@ -127,7 +128,7 @@ export function MessagesPage() {
             </div>
             {currentRole === 'teacher' || activeThread.permissions.membersVisibleToStudents ? (
               <div className="member-list">
-                {members.map((member) => (
+                {members.map((member: User) => (
                   <div key={member.id} className="person-row person-row--static">
                     <span className="avatar-pill" style={{ background: member.avatarTone }}>
                       {member.name.slice(0, 1)}
@@ -145,7 +146,7 @@ export function MessagesPage() {
           </>
         ) : (
           <div className="muted-copy">
-            Direct thread with {members.find((member) => member.id !== currentUser?.id)?.name ?? 'student'}.
+            Direct thread with {members.find((member: User) => member.id !== currentUser?.id)?.name ?? 'student'}.
           </div>
         )}
       </aside>

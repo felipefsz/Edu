@@ -1,7 +1,14 @@
 import { useApp } from '../app/AppState';
 
 export function SettingsPage() {
-  const { resetDemoState, state, toggleLanguage, toggleTheme, updateNotificationChannel, updatePreferences } = useApp();
+  const {
+    resetDemoState,
+    state,
+    toggleLanguage,
+    toggleTheme,
+    updateNotificationChannel,
+    updatePreferences,
+  } = useApp();
 
   return (
     <div className="settings-grid">
@@ -99,10 +106,28 @@ export function SettingsPage() {
       </section>
 
       <section className="panel-card">
+        <div className="panel-card__eyebrow">Experience tuning</div>
+        <div className="stack-gap-sm">
+          <div className="list-card">
+            <strong>Feed behavior</strong>
+            <small>Use compact mode for denser reading or keep comfortable for the editorial layout.</small>
+          </div>
+          <div className="list-card">
+            <strong>Chat behavior</strong>
+            <small>Compact mode keeps more messages on screen and pairs well with desktop review sessions.</small>
+          </div>
+          <div className="list-card">
+            <strong>Future AI layer</strong>
+            <small>This app is being prepared for AI helpers like study suggestions, writing feedback, and moderation prompts.</small>
+          </div>
+        </div>
+      </section>
+
+      <section className="panel-card">
         <div className="panel-card__eyebrow">Demo control</div>
         <p className="muted-copy">
           The old inline HTML database is no longer the app source of truth. This React version
-          persists in localStorage and can be replaced by a real backend later.
+          persists in localStorage and is being prepared for a real backend later.
         </p>
         <button className="danger-button" type="button" onClick={resetDemoState}>
           Reset demo state

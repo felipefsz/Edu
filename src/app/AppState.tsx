@@ -36,6 +36,13 @@ interface CreateTaskInput {
   attachments: string[];
 }
 
+interface CreateNoticeInput {
+  title: string;
+  body: string;
+  classroom?: string;
+  pinned?: boolean;
+}
+
 interface AppContextValue {
   state: AppState;
   currentUser: ReturnType<typeof getCurrentUser>;
@@ -63,6 +70,9 @@ interface AppContextValue {
   updateGroup: (groupId: string, patch: Partial<ChatGroup>) => void;
   createTask: (input: CreateTaskInput) => void;
   submitTask: (taskId: string, note: string, attachments: string[]) => void;
+  reviewTaskSubmission: (taskId: string, userId: string, feedback: string, score?: number) => void;
+  createNotice: (input: CreateNoticeInput) => void;
+  toggleFollow: (targetUserId: string) => void;
   resetDemoState: () => void;
 }
 
@@ -590,6 +600,93 @@ export function AppProvider({ children }: PropsWithChildren) {
     }));
   };
 
+  const reviewTaskSubmission = (taskId: string, userId: string, feedback: string, score?: number) => {
+    if (!currentUser || currentUser.role !== 'teacher') return;
+
+    setState((currentState) => ({
+      ...currentState,
+      tasks: currentState.tasks.map((task) => {
+        if (task.id !== taskId) return task;
+
+        return {
+          ...task,
+          updatedAt: new Date().toISOString(),
+          submissions: task.submissions.map((submission) =>
+            submission.userId !== userId
+              ? submission
+              : {
+                  ...submission,
+                  status: 'reviewed',
+                  feedback: feedback.trim(),
+                  score,
+                  reviewedAt: new Date().toISOString(),
+                },
+          ),
+        };
+      }),
+      notifications: [
+        createNotification(`A submission review is ready.`, 'academic', 'tasks', taskId),
+        ...currentState.notifications,
+      ],
+    }));
+  };
+
+  const createNotice = (input: CreateNoticeInput) => {
+    if (!currentUser || currentUser.role !== 'teacher' || !input.title.trim() || !input.body.trim()) return;
+
+    setState((currentState) => ({
+      ...currentState,
+      notices: [
+        {
+          id: makeId('notice'),
+          title: input.title.trim(),
+          body: input.body.trim(),
+          createdAt: new Date().toISOString(),
+          pinned: Boolean(input.pinned),
+          classroom: input.classroom,
+        },
+        ...currentState.notices,
+      ],
+      notifications: [
+        createNotification(`${currentUser.name} posted a new notice.`, 'academic', 'feed'),
+        ...currentState.notifications,
+      ],
+    }));
+  };
+
+  const toggleFollow = (targetUserId: string) => {
+    if (!currentUser || currentUser.id === targetUserId) return;
+
+    setState((currentState) => {
+      const alreadyFollowing = currentState.users.find((user) => user.id === currentUser.id)?.followingIds.includes(targetUserId);
+
+      return {
+        ...currentState,
+        users: currentState.users.map((user) => {
+          if (user.id === currentUser.id) {
+            return {
+              ...user,
+              followingIds: alreadyFollowing
+                ? user.followingIds.filter((userId) => userId !== targetUserId)
+                : [...user.followingIds, targetUserId],
+            };
+          }
+
+          if (user.id === targetUserId) {
+            return {
+              ...user,
+              followerIds: alreadyFollowing
+                ? user.followerIds.filter((userId) => userId !== currentUser.id)
+                : [...user.followerIds, currentUser.id],
+            };
+          }
+
+          return user;
+        }),
+      };
+    });
+  };
+
   const submitTask = (taskId: string, note: string, attachments: string[]) => {
     if (!currentUser || currentUser.role !== 'student') return;
 
@@ -654,6 +751,9 @@ export function AppProvider({ children }: PropsWithChildren) {
     updateGroup,
     createTask,
     submitTask,
+    reviewTaskSubmission,
+    createNotice,
+    toggleFollow,
     resetDemoState,
   };
 

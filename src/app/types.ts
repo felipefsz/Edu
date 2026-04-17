@@ -91,6 +91,9 @@ export interface TaskSubmission {
   submittedAt?: string;
   note: string;
   attachments: string[];
+  feedback?: string;
+  score?: number;
+  reviewedAt?: string;
 }
 
 export interface Task {

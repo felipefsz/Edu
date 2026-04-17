@@ -2,7 +2,14 @@ import { ArrowLeft, Expand, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../app/AppState';
-import { formatRelativeDate, getNotificationsForUser, getPostById, getProfilePosts, getThreadMembers, getUnreadNotificationsCount, getUserById } from '../utils/selectors';
+import {
+  formatRelativeDate,
+  getNotificationsForUser,
+  getPostById,
+  getProfilePosts,
+  getUnreadNotificationsCount,
+  getUserById,
+} from '../utils/selectors';
 import { PostCard } from './PostCard';
 
 export function ModalLayer() {
@@ -11,7 +18,6 @@ export function ModalLayer() {
     createQuotePost,
     currentUser,
     markNotificationsSeen,
-    openModal,
     state,
     t,
     updateGroup,
@@ -58,7 +64,7 @@ export function ModalLayer() {
             <div>
               <div className="modal-eyebrow">{t('notifications')}</div>
               <h2 className="modal-title">
-                {state.preferences.language === 'en' ? `Inbox · ${unreadCount}` : `Caixa · ${unreadCount}`}
+                {state.preferences.language === 'en' ? `Inbox / ${unreadCount}` : `Caixa / ${unreadCount}`}
               </h2>
             </div>
             <button type="button" className="toolbar-button" onClick={closeModal} title={t('close')}>
@@ -76,6 +82,10 @@ export function ModalLayer() {
                   closeModal();
                   if (notification.targetPage === 'profile' && notification.targetId) {
                     navigate(`/profile/${notification.targetId}`);
+                    return;
+                  }
+                  if (notification.targetId && notification.targetPage === 'messages') {
+                    navigate('/messages');
                     return;
                   }
                   navigate(`/${notification.targetPage}`);
@@ -111,7 +121,7 @@ export function ModalLayer() {
           <div className="modal-body stack-gap">
             {sourcePost ? <PostCard post={sourcePost} compact /> : null}
             <label className="field-label" htmlFor="quote-body">
-              {state.preferences.language === 'en' ? 'Your comment' : 'Seu comentário'}
+              {state.preferences.language === 'en' ? 'Your comment' : 'Seu comentario'}
             </label>
             <textarea
               id="quote-body"
@@ -122,7 +132,7 @@ export function ModalLayer() {
               placeholder={
                 state.preferences.language === 'en'
                   ? 'Add your analysis, context, or recommendation...'
-                  : 'Adicione sua análise, contexto ou recomendação...'
+                  : 'Adicione sua analise, contexto ou recomendacao...'
               }
             />
             <div className="button-row button-row--end">
@@ -150,7 +160,7 @@ export function ModalLayer() {
           <div className="modal-header">
             <div>
               <div className="modal-eyebrow">
-                {state.preferences.language === 'en' ? 'Group management' : 'Gestão do grupo'}
+                {state.preferences.language === 'en' ? 'Group management' : 'Gestao do grupo'}
               </div>
               <h2 className="modal-title">
                 {state.preferences.language === 'en' ? 'Edit group details' : 'Editar detalhes do grupo'}
@@ -198,7 +208,7 @@ export function ModalLayer() {
               <span>
                 {state.preferences.language === 'en'
                   ? 'Members visible to students'
-                  : 'Membros visíveis para alunos'}
+                  : 'Membros visiveis para alunos'}
               </span>
             </label>
 
