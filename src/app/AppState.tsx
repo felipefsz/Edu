@@ -9,7 +9,6 @@ import { seedState } from '../data/mockData';
 import {
   getCurrentUser,
   getPostById,
-  getThreadById,
   nextNotificationReadState,
 } from '../utils/selectors';
 import { translate } from './translations';
@@ -801,9 +800,4 @@ export function useApp() {
     throw new Error('useApp must be used inside AppProvider');
   }
   return context;
-}
-
-export function useActiveThread() {
-  const { state } = useApp();
-  return getThreadById(state, state.ui.activeThreadId);
 }
