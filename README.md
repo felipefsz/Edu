@@ -7,7 +7,7 @@ React migration foundation for the old `Refat4_*` HTML prototype.
 To open the project locally:
 
 ```bash
-cd "C:\Users\andre\OneDrive\Documentos\New project\edusocial-react"
+cd C://" project\edusocial-react"
 npm install
 npm run dev
 ```
