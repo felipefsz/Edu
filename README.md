@@ -29,7 +29,25 @@ This project is already versioned in GitHub here:
 
 [https://github.com/felipefsz/Edu](https://github.com/felipefsz/Edu)
 
-At this stage there is no public deployed site yet. The current access path is local development via Vite.
+## GitHub Pages
+
+This repository now includes:
+
+- `.github/workflows/ci.yml`
+- `.github/workflows/deploy-pages.yml`
+
+To activate the public site:
+
+1. Open the repository settings on GitHub.
+2. Go to `Settings > Pages`.
+3. In `Build and deployment`, set `Source` to `GitHub Actions`.
+4. Push to `main` or run the deploy workflow manually.
+
+If Pages is enabled correctly, the public URL should be:
+
+[https://felipefsz.github.io/Edu/](https://felipefsz.github.io/Edu/)
+
+Until Pages is enabled in repository settings, the guaranteed access path remains local development via Vite.
 
 ## What changed in this step
 
