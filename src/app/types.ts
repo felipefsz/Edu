@@ -39,6 +39,7 @@ export interface Post {
   kind: PostKind;
   authorId: string;
   body: string;
+  bodyTranslations?: Partial<Record<Language, string>>;
   createdAt: string;
   tags: string[];
   classroom?: string;

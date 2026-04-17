@@ -341,7 +341,9 @@ export function AppProvider({ children }: PropsWithChildren) {
       ],
       notifications: [
         createNotification(
-          `${currentUser.name} published a new post.`,
+          state.preferences.language === 'en'
+            ? `${currentUser.name} published a new post.`
+            : `${currentUser.name} publicou uma nova postagem.`,
           'social',
           'feed',
         ),
@@ -381,7 +383,9 @@ export function AppProvider({ children }: PropsWithChildren) {
       ],
       notifications: [
         createNotification(
-          `${currentUser.name} reposted with comment.`,
+          state.preferences.language === 'en'
+            ? `${currentUser.name} reposted with comment.`
+            : `${currentUser.name} repostou com comentario.`,
           'social',
           'feed',
           sourcePostId,
@@ -428,7 +432,9 @@ export function AppProvider({ children }: PropsWithChildren) {
       ],
       notifications: [
         createNotification(
-          `${currentUser.name} reposted a post.`,
+          state.preferences.language === 'en'
+            ? `${currentUser.name} reposted a post.`
+            : `${currentUser.name} repostou uma publicacao.`,
           'social',
           'feed',
           sourcePostId,
@@ -502,7 +508,10 @@ export function AppProvider({ children }: PropsWithChildren) {
     if (!currentUser || !body.trim()) return;
 
     const attachmentList: MessageAttachment[] = [];
-    const notificationMessage = `${currentUser.name} sent a new message.`;
+    const notificationMessage =
+      state.preferences.language === 'en'
+        ? `${currentUser.name} sent a new message.`
+        : `${currentUser.name} enviou uma nova mensagem.`;
 
     setState((currentState) => ({
       ...currentState,
@@ -594,7 +603,13 @@ export function AppProvider({ children }: PropsWithChildren) {
         ...currentState.tasks,
       ],
       notifications: [
-        createNotification(`A new task is available: ${input.title}.`, 'academic', 'tasks'),
+        createNotification(
+          state.preferences.language === 'en'
+            ? `A new task is available: ${input.title}.`
+            : `Nova tarefa disponivel: ${input.title}.`,
+          'academic',
+          'tasks',
+        ),
         ...currentState.notifications,
       ],
     }));
@@ -625,7 +640,14 @@ export function AppProvider({ children }: PropsWithChildren) {
         };
       }),
       notifications: [
-        createNotification(`A submission review is ready.`, 'academic', 'tasks', taskId),
+        createNotification(
+          state.preferences.language === 'en'
+            ? `A submission review is ready.`
+            : `Uma revisao de entrega esta pronta.`,
+          'academic',
+          'tasks',
+          taskId,
+        ),
         ...currentState.notifications,
       ],
     }));
@@ -648,7 +670,13 @@ export function AppProvider({ children }: PropsWithChildren) {
         ...currentState.notices,
       ],
       notifications: [
-        createNotification(`${currentUser.name} posted a new notice.`, 'academic', 'feed'),
+        createNotification(
+          state.preferences.language === 'en'
+            ? `${currentUser.name} posted a new notice.`
+            : `${currentUser.name} publicou um novo aviso.`,
+          'academic',
+          'feed',
+        ),
         ...currentState.notifications,
       ],
     }));
@@ -714,7 +742,14 @@ export function AppProvider({ children }: PropsWithChildren) {
         };
       }),
       notifications: [
-        createNotification(`${currentUser.name} submitted a task delivery.`, 'academic', 'tasks', taskId),
+        createNotification(
+          state.preferences.language === 'en'
+            ? `${currentUser.name} submitted a task delivery.`
+            : `${currentUser.name} enviou uma entrega de tarefa.`,
+          'academic',
+          'tasks',
+          taskId,
+        ),
         ...currentState.notifications,
       ],
     }));

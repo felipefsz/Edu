@@ -23,6 +23,7 @@ export function FeedPage() {
     openModal,
     state,
     toggleFollow,
+    t,
   } = useApp();
   const [postBody, setPostBody] = useState('');
   const [pinPost, setPinPost] = useState(false);
@@ -41,6 +42,7 @@ export function FeedPage() {
   const noticeHighlights = getRelevantNotices(state, currentUser).slice(0, 3);
   const allNoticeHighlights = getNoticeHighlights(state).slice(0, 2);
   const upcomingTasks = getUpcomingTasks(state, currentUser);
+  const isEnglish = state.preferences.language === 'en';
 
   return (
     <div className="page-grid page-grid--feed">
@@ -48,41 +50,51 @@ export function FeedPage() {
         <div className="hero-panel hero-panel--feed">
           <div>
             <div className="panel-card__eyebrow">
-              {currentRole === 'teacher' ? 'Teacher pulse' : 'Student rhythm'}
+              {currentRole === 'teacher'
+                ? isEnglish ? 'Teacher pulse' : 'Pulso do professor'
+                : isEnglish ? 'Student rhythm' : 'Ritmo do aluno'}
             </div>
             <h1 className="hero-panel__title">
               {currentRole === 'teacher'
-                ? 'Run the school social layer with context, notices, and teaching signals.'
-                : 'Keep your study flow visible, social, and connected to what matters this week.'}
+                ? isEnglish
+                  ? 'Run the school social layer with context, notices, and teaching signals.'
+                  : 'Conduza a camada social da escola com contexto, avisos e sinais de ensino.'
+                : isEnglish
+                  ? 'Keep your study flow visible, social, and connected to what matters this week.'
+                  : 'Mantenha seu fluxo de estudos visivel, social e conectado ao que importa nesta semana.'}
             </h1>
             <p className="hero-panel__copy">
               {currentRole === 'teacher'
-                ? 'Blend posts, class notices, and academic action from the same surface.'
-                : 'See notices, tasks, saved content, and your social learning loop in one feed.'}
+                ? isEnglish
+                  ? 'Blend posts, class notices, and academic action from the same surface.'
+                  : 'Misture posts, avisos de turma e acao academica na mesma superficie.'
+                : isEnglish
+                  ? 'See notices, tasks, saved content, and your social learning loop in one feed.'
+                  : 'Veja avisos, tarefas, conteudo salvo e seu ciclo social de aprendizagem no mesmo feed.'}
             </p>
           </div>
 
           <div className="metric-grid">
             {currentRole === 'teacher' ? (
               <>
-                <MetricTile label="Posts in motion" value={posts.length} accent="blue" />
-                <MetricTile label="Unread inbox" value={state.notifications.length} accent="yellow" />
-                <MetricTile label="Active tasks" value={state.tasks.length} accent="green" />
-                <MetricTile label="Live groups" value={state.chatGroups.length} accent="pink" />
+                <MetricTile label={isEnglish ? 'Posts in motion' : 'Posts em movimento'} value={posts.length} accent="blue" />
+                <MetricTile label={isEnglish ? 'Unread inbox' : 'Caixa nao lida'} value={state.notifications.length} accent="yellow" />
+                <MetricTile label={isEnglish ? 'Active tasks' : 'Tarefas ativas'} value={state.tasks.length} accent="green" />
+                <MetricTile label={isEnglish ? 'Live groups' : 'Grupos ativos'} value={state.chatGroups.length} accent="pink" />
               </>
             ) : (
               <>
-                <MetricTile label="Average grade" value={studentOverview?.averageGrade.toFixed(1) ?? '0.0'} accent="blue" />
-                <MetricTile label="Saved posts" value={studentOverview?.savedPostCount ?? 0} accent="green" />
-                <MetricTile label="Unread chats" value={studentOverview?.unreadMessages ?? 0} accent="yellow" />
-                <MetricTile label="Streak" value={currentUser?.streak ?? 0} accent="pink" />
+                <MetricTile label={isEnglish ? 'Average grade' : 'Media geral'} value={studentOverview?.averageGrade.toFixed(1) ?? '0.0'} accent="blue" />
+                <MetricTile label={isEnglish ? 'Saved posts' : 'Posts salvos'} value={studentOverview?.savedPostCount ?? 0} accent="green" />
+                <MetricTile label={isEnglish ? 'Unread chats' : 'Conversas nao lidas'} value={studentOverview?.unreadMessages ?? 0} accent="yellow" />
+                <MetricTile label={isEnglish ? 'Streak' : 'Sequencia'} value={currentUser?.streak ?? 0} accent="pink" />
               </>
             )}
           </div>
         </div>
 
         <section className="panel-card">
-          <div className="panel-card__eyebrow">Composer</div>
+          <div className="panel-card__eyebrow">{isEnglish ? 'Composer' : 'Composer social'}</div>
           <div className="composer-card">
             <textarea
               className="ui-textarea"
@@ -91,8 +103,12 @@ export function FeedPage() {
               onChange={(event) => setPostBody(event.target.value)}
               placeholder={
                 currentRole === 'teacher'
-                  ? 'Share guidance, context, or a school-wide update...'
-                  : 'Share a study update, a question, or something useful...'
+                  ? isEnglish
+                    ? 'Share guidance, context, or a school-wide update...'
+                    : 'Compartilhe orientacoes, contexto ou um aviso geral da escola...'
+                  : isEnglish
+                    ? 'Share a study update, a question, or something useful...'
+                    : 'Compartilhe um update de estudo, uma pergunta ou algo util...'
               }
             />
             <div className="composer-card__actions">
@@ -104,10 +120,12 @@ export function FeedPage() {
                     checked={pinPost}
                     onChange={(event) => setPinPost(event.target.checked)}
                   />
-                  <span>Pin on top</span>
+                  <span>{isEnglish ? 'Pin on top' : 'Fixar no topo'}</span>
                 </label>
               ) : (
-                <div className="tag-hint">Use hashtags like #math #review #studygroup</div>
+                <div className="tag-hint">
+                  {isEnglish ? 'Use hashtags like #math #review #studygroup' : 'Use hashtags como #matematica #revisao #grupoDeEstudo'}
+                </div>
               )}
               <button
                 className="solid-button"
@@ -118,7 +136,7 @@ export function FeedPage() {
                   setPinPost(false);
                 }}
               >
-                Publish
+                {isEnglish ? 'Publish' : 'Publicar'}
               </button>
             </div>
           </div>
@@ -126,25 +144,25 @@ export function FeedPage() {
 
         {currentRole === 'teacher' ? (
           <section className="panel-card">
-            <div className="panel-card__eyebrow">Academic bulletin</div>
+            <div className="panel-card__eyebrow">{isEnglish ? 'Academic bulletin' : 'Boletim academico'}</div>
             <div className="form-grid">
               <input
                 className="ui-input"
                 value={noticeForm.title}
-                placeholder="Notice title"
+                placeholder={isEnglish ? 'Notice title' : 'Titulo do aviso'}
                 onChange={(event) => setNoticeForm((current) => ({ ...current, title: event.target.value }))}
               />
               <input
                 className="ui-input"
                 value={noticeForm.classroom}
-                placeholder="Classroom or leave empty"
+                placeholder={isEnglish ? 'Classroom or leave empty' : 'Turma ou deixe vazio'}
                 onChange={(event) => setNoticeForm((current) => ({ ...current, classroom: event.target.value }))}
               />
               <textarea
                 className="ui-textarea"
                 rows={4}
                 value={noticeForm.body}
-                placeholder="Write the update, next step, or guidance..."
+                placeholder={isEnglish ? 'Write the update, next step, or guidance...' : 'Escreva o aviso, proximo passo ou orientacao...'}
                 onChange={(event) => setNoticeForm((current) => ({ ...current, body: event.target.value }))}
               />
             </div>
@@ -156,7 +174,7 @@ export function FeedPage() {
                   checked={noticeForm.pinned}
                   onChange={(event) => setNoticeForm((current) => ({ ...current, pinned: event.target.checked }))}
                 />
-                <span>Pin notice in the feed</span>
+                <span>{isEnglish ? 'Pin notice in the feed' : 'Fixar aviso no feed'}</span>
               </label>
               <button
                 className="solid-button"
@@ -171,7 +189,7 @@ export function FeedPage() {
                   setNoticeForm({ title: '', body: '', classroom: '', pinned: false });
                 }}
               >
-                Publish notice
+                {isEnglish ? 'Publish notice' : 'Publicar aviso'}
               </button>
             </div>
           </section>
@@ -187,14 +205,16 @@ export function FeedPage() {
       <aside className="stack-gap">
         <section className="panel-card">
           <div className="panel-card__eyebrow">
-            {currentRole === 'teacher' ? 'Social radar' : 'Weekly focus'}
+            {currentRole === 'teacher'
+              ? isEnglish ? 'Social radar' : 'Radar social'
+              : isEnglish ? 'Weekly focus' : 'Foco da semana'}
           </div>
           {currentRole === 'teacher' ? (
             <div className="stack-gap-sm">
               {trendingTags.slice(0, 4).map((trend) => (
                 <button key={trend.tag} type="button" className="list-card">
                   <strong>#{trend.tag}</strong>
-                  <small>{trend.count} posts in the stream</small>
+                  <small>{isEnglish ? `${trend.count} posts in the stream` : `${trend.count} posts em circulacao`}</small>
                 </button>
               ))}
             </div>
@@ -208,22 +228,22 @@ export function FeedPage() {
                   </div>
                 ))
               ) : (
-                <div className="muted-copy">All missions for this cycle are already done.</div>
+                <div className="muted-copy">{isEnglish ? 'All missions for this cycle are already done.' : 'Todas as missoes deste ciclo ja foram concluidas.'}</div>
               )}
             </div>
           )}
         </section>
 
         <section className="panel-card">
-          <div className="panel-card__eyebrow">Notice board</div>
+          <div className="panel-card__eyebrow">{isEnglish ? 'Notice board' : 'Quadro de avisos'}</div>
           <div className="stack-gap-sm">
             {noticeHighlights.map((notice) => (
               <div key={notice.id} className="list-card list-card--notice">
                 <strong>{notice.title}</strong>
                 <small>{notice.body}</small>
                 <div className="tag-list">
-                  {notice.classroom ? <span className="tag-pill">Class {notice.classroom}</span> : null}
-                  {notice.pinned ? <span className="status-pill">Pinned</span> : null}
+                  {notice.classroom ? <span className="tag-pill">{t('classLabel')} {notice.classroom}</span> : null}
+                  {notice.pinned ? <span className="status-pill">{t('pinned')}</span> : null}
                 </div>
               </div>
             ))}
@@ -232,7 +252,9 @@ export function FeedPage() {
 
         <section className="panel-card">
           <div className="panel-card__eyebrow">
-            {currentRole === 'teacher' ? 'Published notices' : 'Next tasks'}
+            {currentRole === 'teacher'
+              ? isEnglish ? 'Published notices' : 'Avisos publicados'
+              : isEnglish ? 'Next tasks' : 'Proximas tarefas'}
           </div>
           <div className="stack-gap-sm">
             {currentRole === 'teacher'
@@ -245,14 +267,14 @@ export function FeedPage() {
               : upcomingTasks.map((task) => (
                   <div key={task.id} className="list-card">
                     <strong>{task.title}</strong>
-                    <small>{task.subject} · {task.deadline}</small>
+                    <small>{task.subject} / {task.deadline}</small>
                   </div>
                 ))}
           </div>
         </section>
 
         <section className="panel-card">
-          <div className="panel-card__eyebrow">People to follow</div>
+          <div className="panel-card__eyebrow">{isEnglish ? 'People to follow' : 'Pessoas para seguir'}</div>
           <div className="stack-gap-sm">
             {followSuggestions.map((user) => (
               <div key={user.id} className="person-stack">
@@ -266,11 +288,11 @@ export function FeedPage() {
                   </span>
                   <span>
                     <strong>{user.name}</strong>
-                    <small>{user.classroom ? `Class ${user.classroom}` : user.role}</small>
+                    <small>{user.classroom ? `${t('classLabel')} ${user.classroom}` : t('teacherLabel')}</small>
                   </span>
                 </button>
                 <button className="ghost-button ghost-button--slim" type="button" onClick={() => toggleFollow(user.id)}>
-                  Follow
+                  {isEnglish ? 'Follow' : 'Seguir'}
                 </button>
               </div>
             ))}
@@ -278,7 +300,7 @@ export function FeedPage() {
         </section>
 
         <section className="panel-card">
-          <div className="panel-card__eyebrow">Top students</div>
+          <div className="panel-card__eyebrow">{isEnglish ? 'Top students' : 'Top alunos'}</div>
           <div className="stack-gap-sm">
             {topStudents.map((user, index) => (
               <div key={user.id} className="person-row person-row--static">
@@ -288,7 +310,7 @@ export function FeedPage() {
                 </span>
                 <span>
                   <strong>{user.name}</strong>
-                  <small>{user.classroom ? `Class ${user.classroom}` : 'Student'}</small>
+                  <small>{user.classroom ? `${t('classLabel')} ${user.classroom}` : isEnglish ? 'Student' : 'Aluno'}</small>
                 </span>
               </div>
             ))}

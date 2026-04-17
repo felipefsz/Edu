@@ -2,9 +2,9 @@ import { ArrowRight, Sparkles, Layers3, Gauge } from 'lucide-react';
 import { useApp } from '../app/AppState';
 
 const quickAccounts = [
-  { id: 'teacher', label: 'Professor', detail: 'Teacher command center' },
-  { id: 'ana', label: 'Ana Lima', detail: 'Student social dashboard' },
-  { id: 'diego', label: 'Diego Melo', detail: 'High-performance student flow' },
+  { id: 'teacher', label: 'Professor', detail: 'Painel completo de gestao escolar' },
+  { id: 'ana', label: 'Ana Lima', detail: 'Fluxo social e academico do aluno' },
+  { id: 'diego', label: 'Diego Melo', detail: 'Aluno com alto desempenho e rotina forte' },
 ];
 
 export function LandingPage() {
@@ -16,13 +16,13 @@ export function LandingPage() {
         <div className="landing-copy">
           <span className="hero-badge">
             <Sparkles size={15} />
-            React migration step 2
+            Refat 4 em React
           </span>
-          <h1>EduSocial is now moving into a real React architecture.</h1>
+          <h1>Uma camada social escolar mais viva, organizada e pronta para evoluir.</h1>
           <p>
-            The legacy HTML remains as reference, but this new app already splits data, state,
-            modals, search, feed, messaging, tasks, analytics, and settings into a structure
-            that can grow like a production product.
+            Esta versao preserva a atmosfera do HTML original, mas agora em uma arquitetura React
+            real, com estado centralizado, componentes reutilizaveis, pesquisa, feed, mensagens,
+            tarefas, analytics e configuracoes em crescimento constante.
           </p>
           <div className="landing-actions">
             {quickAccounts.map((account) => (
@@ -32,45 +32,53 @@ export function LandingPage() {
               </button>
             ))}
           </div>
+          <div className="landing-account-hints">
+            {quickAccounts.map((account) => (
+              <div key={account.id} className="list-card">
+                <strong>{account.label}</strong>
+                <small>{account.detail}</small>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="landing-grid">
           <article className="feature-card">
             <Layers3 size={18} />
-            <strong>Feature-first structure</strong>
-            <p>State in TypeScript, reusable components, and pages separated from the old monolith.</p>
+            <strong>Estrutura por camadas</strong>
+            <p>Estado em TypeScript, paginas modulares e espaco pronto para crescer sem voltar ao monolito.</p>
           </article>
           <article className="feature-card">
             <Gauge size={18} />
-            <strong>Light but complete</strong>
-            <p>React, Router, local persistence, theme, language, search, notifications, and analytics.</p>
+            <strong>Leve, mas completo</strong>
+            <p>Feed, mensagens, tarefas, busca expansivel, notificacoes, tema, idioma e analytics no mesmo fluxo.</p>
           </article>
           <article className="feature-card">
             <Sparkles size={18} />
-            <strong>Ready for backend swap</strong>
-            <p>Mock data is isolated, so Supabase, Firebase, or a custom API can replace it cleanly.</p>
+            <strong>Pronto para backend real</strong>
+            <p>Os mocks ficam isolados para depois trocar por Supabase ou outra camada sem desmontar a UX.</p>
           </article>
         </div>
       </section>
 
       <section className="landing-preview">
-        <div className="landing-preview__label">Seed status</div>
+        <div className="landing-preview__label">Estado inicial da demo</div>
         <div className="landing-preview__stats">
           <div>
             <strong>{state.users.length}</strong>
-            <span>users</span>
+            <span>usuarios</span>
           </div>
           <div>
             <strong>{state.posts.length}</strong>
-            <span>posts</span>
+            <span>publicacoes</span>
           </div>
           <div>
             <strong>{state.tasks.length}</strong>
-            <span>tasks</span>
+            <span>tarefas</span>
           </div>
           <div>
             <strong>{state.chatGroups.length + state.directThreads.length}</strong>
-            <span>threads</span>
+            <span>conversas</span>
           </div>
         </div>
       </section>

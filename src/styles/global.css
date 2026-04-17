@@ -181,10 +181,27 @@ html[data-transparency='solid'] .floating-top-button {
 .list-card,
 .thread-item,
 .submission-card {
-  background: var(--surface-1);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 100%),
+    var(--surface-1);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+  position: relative;
+}
+
+.panel-card::before,
+.post-card::before,
+.task-card::before,
+.hero-panel::before,
+.feature-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(99, 116, 246, 0.08), transparent 42%);
 }
 
 .sidebar-card {
@@ -606,6 +623,21 @@ html[data-transparency='solid'] .floating-top-button {
   line-height: 1.65;
 }
 
+.feed-translate-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.feed-translate-note {
+  color: var(--text-3);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
 .quoted-post {
   padding: 0.95rem;
   border-radius: var(--radius-md);
@@ -906,6 +938,11 @@ html[data-transparency='solid'] .floating-top-button {
   border-radius: 32px;
   padding: 1.5rem;
   backdrop-filter: blur(18px);
+}
+
+.landing-account-hints {
+  display: grid;
+  gap: 0.75rem;
 }
 
 .landing-actions {

@@ -1,13 +1,14 @@
 import {
   Bookmark,
   Heart,
+  Languages,
   MessageCircle,
-  Repeat2,
   Quote,
+  Repeat2,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useApp } from '../app/AppState';
-import type { Post } from '../app/types';
+import type { Language, Post } from '../app/types';
 import { formatRelativeDate, getPostById, getUserById } from '../utils/selectors';
 
 interface PostCardProps {
@@ -28,11 +29,22 @@ export function PostCard({ post, compact = false }: PostCardProps) {
   } = useApp();
   const [commentBody, setCommentBody] = useState('');
   const [showComments, setShowComments] = useState(false);
+  const [showTranslation, setShowTranslation] = useState(false);
   const author = getUserById(state, post.authorId);
   const sourcePost = getPostById(state, post.sourcePostId);
   const sourceAuthor = getUserById(state, sourcePost?.authorId);
   const liked = currentUser ? post.likeUserIds.includes(currentUser.id) : false;
   const saved = currentUser ? post.savedByUserIds.includes(currentUser.id) : false;
+  const targetLanguage: Language = state.preferences.language === 'pt' ? 'en' : 'pt';
+  const translatedBody = post.bodyTranslations?.[targetLanguage];
+  const displayBody = showTranslation && translatedBody ? translatedBody : post.body;
+  const translationLabel = useMemo(
+    () =>
+      targetLanguage === 'en'
+        ? t('translatedFromPortuguese')
+        : t('translatedFromEnglish'),
+    [t, targetLanguage],
+  );
 
   return (
     <article className={compact ? 'post-card post-card--compact' : 'post-card'} data-feed-card>
@@ -42,29 +54,45 @@ export function PostCard({ post, compact = false }: PostCardProps) {
             {author?.name.slice(0, 1) ?? '?'}
           </span>
           <span>
-            <strong>{author?.name ?? 'Unknown user'}</strong>
+            <strong>{author?.name ?? 'Usuario'}</strong>
             <small>
               {author?.role === 'teacher'
-                ? 'Teacher'
-                : `Class ${author?.classroom ?? '-'} · ${formatRelativeDate(post.createdAt)}`}
+                ? t('teacherLabel')
+                : `${t('classLabel')} ${author?.classroom ?? '-'} / ${formatRelativeDate(post.createdAt)}`}
             </small>
           </span>
         </button>
-        {post.pinned ? <span className="status-pill status-pill--accent">Pinned</span> : null}
+        {post.pinned ? <span className="status-pill status-pill--accent">{t('pinned')}</span> : null}
       </header>
 
       <div className="post-card__body feed-card-body">
         {post.kind !== 'regular' && sourcePost ? (
           <div className="quoted-post">
             <div className="quoted-post__eyebrow">
-              {post.kind === 'quote' ? 'Quoted post' : 'Reposted post'}
+              {post.kind === 'quote'
+                ? state.preferences.language === 'en' ? 'Quoted post' : 'Publicacao comentada'
+                : state.preferences.language === 'en' ? 'Reposted post' : 'Publicacao repostada'}
             </div>
-            <div className="quoted-post__author">{sourceAuthor?.name ?? 'Original author'}</div>
+            <div className="quoted-post__author">{sourceAuthor?.name ?? 'Autor original'}</div>
             <p>{sourcePost.body}</p>
           </div>
         ) : null}
 
-        {post.body ? <p className="post-card__text">{post.body}</p> : null}
+        {displayBody ? <p className="post-card__text">{displayBody}</p> : null}
+
+        {translatedBody ? (
+          <div className="feed-translate-row">
+            {showTranslation ? <small className="feed-translate-note">{translationLabel}</small> : <span />}
+            <button
+              type="button"
+              className="ghost-button ghost-button--slim"
+              onClick={() => setShowTranslation((value) => !value)}
+            >
+              <Languages size={15} />
+              <span>{showTranslation ? t('seeOriginal') : t('translatePost')}</span>
+            </button>
+          </div>
+        ) : null}
 
         {post.tags.length ? (
           <div className="tag-list">
@@ -124,7 +152,7 @@ export function PostCard({ post, compact = false }: PostCardProps) {
             const commentAuthor = getUserById(state, comment.authorId);
             return (
               <div key={comment.id} className="comment-row">
-                <strong>{commentAuthor?.name ?? 'User'}</strong>
+                <strong>{commentAuthor?.name ?? 'Usuario'}</strong>
                 <p>{comment.body}</p>
               </div>
             );
@@ -133,7 +161,7 @@ export function PostCard({ post, compact = false }: PostCardProps) {
             <input
               value={commentBody}
               onChange={(event) => setCommentBody(event.target.value)}
-              placeholder={t('comments')}
+              placeholder={state.preferences.language === 'en' ? 'Write a comment' : 'Escreva um comentario'}
             />
             <button
               type="button"

@@ -74,7 +74,7 @@ export function AppLayout() {
                 }
               >
                 <Icon size={17} />
-                <span>{item.label}</span>
+                <span>{t(item.key)}</span>
               </NavLink>
             );
           })}
@@ -158,7 +158,7 @@ export function AppLayout() {
                 }
               >
                 <Icon size={16} />
-                <span>{item.label}</span>
+                <span>{t(item.key)}</span>
               </NavLink>
             );
           })}
