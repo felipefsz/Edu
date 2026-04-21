@@ -248,6 +248,9 @@ export function getTeacherAnalytics(state: AppState) {
     totalPosts: state.posts.length,
     totalTasks: state.tasks.length,
     totalNotices: state.notices.length,
+    totalForumTopics: state.forumTopics.length,
+    totalQuizzes: state.quizzes.length,
+    totalQuizResponses: state.quizzes.reduce((total, quiz) => total + quiz.responses.length, 0),
     activeStreaks: studentUsers.filter((user) => user.streak >= 3).length,
     totalPostInteractions,
     averageEngagementPerPost: Number((totalPostInteractions / Math.max(state.posts.length, 1)).toFixed(1)),
@@ -358,7 +361,7 @@ export function buildSearchResults(state: AppState, query: string): SearchResult
         subtitle: `${task.subject} · ${task.deadline}`,
         targetPage: 'tasks',
         targetId: task.id,
-        priority: 4,
+        priority: 5,
       });
     }
   });
@@ -372,6 +375,42 @@ export function buildSearchResults(state: AppState, query: string): SearchResult
         subtitle: notice.body.slice(0, 72),
         targetPage: 'feed',
         targetId: notice.id,
+        priority: 6,
+      });
+    }
+  });
+
+  state.forumTopics.forEach((topic) => {
+    if (
+      topic.title.toLowerCase().includes(trimmed) ||
+      topic.body.toLowerCase().includes(trimmed) ||
+      topic.tags.some((tag) => tag.toLowerCase().includes(trimmed))
+    ) {
+      results.push({
+        id: `forum-${topic.id}`,
+        type: 'forum',
+        title: topic.title,
+        subtitle: topic.body.slice(0, 72),
+        targetPage: 'forum',
+        targetId: topic.id,
+        priority: 4,
+      });
+    }
+  });
+
+  state.quizzes.forEach((quiz) => {
+    if (
+      quiz.title.toLowerCase().includes(trimmed) ||
+      quiz.subject.toLowerCase().includes(trimmed) ||
+      quiz.description.toLowerCase().includes(trimmed)
+    ) {
+      results.push({
+        id: `quiz-${quiz.id}`,
+        type: 'quiz',
+        title: quiz.title,
+        subtitle: `${quiz.subject} · ${quiz.questions.length} questoes`,
+        targetPage: 'quiz',
+        targetId: quiz.id,
         priority: 5,
       });
     }
@@ -403,6 +442,20 @@ export function getRelevantNotices(state: AppState, currentUser: User | null) {
   return getNoticeHighlights(state).filter(
     (notice) => !notice.classroom || notice.classroom === currentUser.classroom,
   );
+}
+
+export function getVisibleForumTopics(state: AppState, currentUser: User | null) {
+  const sortedTopics = [...state.forumTopics].sort(
+    (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+  );
+
+  if (!currentUser || currentUser.role === 'teacher') return sortedTopics;
+  return sortedTopics.filter((topic) => !topic.classroom || topic.classroom === currentUser.classroom);
+}
+
+export function getVisibleQuizzes(state: AppState, currentUser: User | null) {
+  if (!currentUser || currentUser.role === 'teacher') return state.quizzes;
+  return state.quizzes.filter((quiz) => !quiz.classroom || quiz.classroom === currentUser.classroom);
 }
 
 export function getCalendarItems(state: AppState, currentUser: User | null) {
@@ -447,12 +500,15 @@ export function getStudentOverview(state: AppState, currentUser: User | null) {
 export function buildNavigation(currentUser: User | null) {
   const items: Array<{ key: PageKey; label: string }> = [
     { key: 'feed', label: 'Feed' },
+    { key: 'explore', label: 'Explore' },
     { key: 'messages', label: 'Messages' },
     { key: 'tasks', label: 'Tasks' },
     { key: 'grades', label: 'Grades' },
     { key: 'calendar', label: 'Calendar' },
     { key: 'missions', label: 'Missions' },
     { key: 'notices', label: 'Notices' },
+    { key: 'forum', label: 'Forum' },
+    { key: 'quiz', label: 'Quiz' },
     { key: 'analytics', label: 'Analytics' },
     { key: 'settings', label: 'Settings' },
   ];

@@ -1,4 +1,4 @@
-import { Search, UserRound, Users, MessageSquareText, FileText, BellRing } from 'lucide-react';
+import { Search, UserRound, Users, MessageSquareText, FileText, BellRing, NotebookTabs, HelpCircle } from 'lucide-react';
 import { useDeferredValue } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../app/AppState';
@@ -10,6 +10,8 @@ const iconMap = {
   post: MessageSquareText,
   task: FileText,
   notice: BellRing,
+  forum: NotebookTabs,
+  quiz: HelpCircle,
 };
 
 export function SearchBar() {

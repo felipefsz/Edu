@@ -339,6 +339,99 @@ export const seedState: AppState = {
       pinned: false,
     },
   ],
+  forumTopics: [
+    {
+      id: 'forum-1',
+      title: 'Duvida sobre equacoes do 2º grau',
+      body: 'Quando eu identifico que preciso usar Bhaskara e quando vale tentar fatoracao primeiro?',
+      authorId: 'bruno',
+      classroom: 'A',
+      tags: ['matematica', 'duvida', 'equacoes'],
+      createdAt: '2026-04-16T08:22:00-03:00',
+      resolved: false,
+      replies: [
+        {
+          id: 'forum-reply-1',
+          authorId: 'teacher',
+          body: 'Use Bhaskara quando a fatoracao nao estiver clara. Primeiro calcule o delta; se houver raizes simples, tente fatorar depois para conferir.',
+          createdAt: '2026-04-16T08:35:00-03:00',
+        },
+      ],
+    },
+    {
+      id: 'forum-2',
+      title: 'Como montar repertorio para redacao?',
+      body: 'Quero separar referencias boas por tema, mas sempre fico perdida na hora de escolher.',
+      authorId: 'carla',
+      classroom: 'B',
+      tags: ['redacao', 'linguagens', 'repertorio'],
+      createdAt: '2026-04-15T17:20:00-03:00',
+      resolved: true,
+      replies: [
+        {
+          id: 'forum-reply-2',
+          authorId: 'elisa',
+          body: 'Eu separo por eixo: tecnologia, educacao, desigualdade e meio ambiente. Ajuda muito na hora de conectar com o tema.',
+          createdAt: '2026-04-15T17:55:00-03:00',
+        },
+      ],
+    },
+  ],
+  quizzes: [
+    {
+      id: 'quiz-1',
+      title: 'Revisao de Matematica',
+      description: 'Aquecimento rapido para revisar contas essenciais antes da sprint.',
+      subject: 'Matematica',
+      classroom: 'A',
+      closesAt: '2026-04-19',
+      questions: [
+        {
+          id: 'quiz-1-q1',
+          prompt: 'Quanto e 2 + 2?',
+          options: ['3', '4', '5', '6'],
+          correctOptionIndex: 1,
+        },
+        {
+          id: 'quiz-1-q2',
+          prompt: 'Qual e a raiz quadrada de 16?',
+          options: ['2', '3', '4', '5'],
+          correctOptionIndex: 2,
+        },
+      ],
+      responses: [
+        {
+          userId: 'ana',
+          answers: [1, 2],
+          score: 10,
+          submittedAt: '2026-04-16T08:50:00-03:00',
+        },
+      ],
+    },
+    {
+      id: 'quiz-2',
+      title: 'Leitura e interpretacao',
+      description: 'Mini simulado com foco em inferencia, tese e evidencia textual.',
+      subject: 'Linguagens',
+      classroom: 'B',
+      closesAt: '2026-04-20',
+      questions: [
+        {
+          id: 'quiz-2-q1',
+          prompt: 'A ideia central de um paragrafo costuma aparecer em qual elemento?',
+          options: ['Exemplo isolado', 'Topico frasal', 'Rodape', 'Titulo da bibliografia'],
+          correctOptionIndex: 1,
+        },
+        {
+          id: 'quiz-2-q2',
+          prompt: 'Uma inferencia depende principalmente de:',
+          options: ['Chute rapido', 'Pistas do texto', 'Memoria decorada', 'Opiniao sem evidencia'],
+          correctOptionIndex: 1,
+        },
+      ],
+      responses: [],
+    },
+  ],
   notifications: [
     {
       id: 'notification-1',

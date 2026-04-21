@@ -3,12 +3,15 @@ import {
   Bell,
   BookOpenCheck,
   CalendarDays,
+  Compass,
   Globe2,
+  HelpCircle,
   LayoutDashboard,
   LogOut,
   Megaphone,
   MessageSquare,
   MoonStar,
+  NotebookTabs,
   Settings,
   SunMedium,
   Trophy,
@@ -23,12 +26,15 @@ import { useApp } from '../app/AppState';
 
 const iconMap = {
   feed: LayoutDashboard,
+  explore: Compass,
   messages: MessageSquare,
   tasks: Bell,
   grades: BookOpenCheck,
   calendar: CalendarDays,
   missions: Trophy,
   notices: Megaphone,
+  forum: NotebookTabs,
+  quiz: HelpCircle,
   analytics: BarChart3,
   settings: Settings,
 };
@@ -119,6 +125,8 @@ export function AppLayout() {
             <div className="topbar-title__headline">
               {location.pathname.includes('/messages')
                 ? t('messagesHeadline')
+                : location.pathname.includes('/explore')
+                  ? t('exploreHeadline')
                 : location.pathname.includes('/tasks')
                   ? t('tasksHeadline')
                   : location.pathname.includes('/grades')
@@ -129,11 +137,15 @@ export function AppLayout() {
                         ? t('missionsHeadline')
                         : location.pathname.includes('/notices')
                           ? t('noticesHeadline')
-                          : location.pathname.includes('/analytics')
-                            ? t('analyticsHeadline')
-                            : location.pathname.includes('/settings')
-                              ? t('settingsHeadline')
-                              : t('feedHeadline')}
+                          : location.pathname.includes('/forum')
+                            ? t('forumHeadline')
+                            : location.pathname.includes('/quiz')
+                              ? t('quizHeadline')
+                              : location.pathname.includes('/analytics')
+                                ? t('analyticsHeadline')
+                                : location.pathname.includes('/settings')
+                                  ? t('settingsHeadline')
+                                  : t('feedHeadline')}
             </div>
           </div>
 

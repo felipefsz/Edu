@@ -7,7 +7,7 @@ React migration foundation for the old `Refat4_*` HTML prototype.
 To open the project locally:
 
 ```bash
-cd C://" project\edusocial-react"
+cd "C:\Users\andre\OneDrive\Documentos\New project\edusocial-react"
 npm install
 npm run dev
 ```
@@ -66,8 +66,15 @@ Until Pages is enabled in repository settings, the guaranteed access path remain
 ## Current pages
 
 - `Feed`
+- `Explore`
 - `Messages`
 - `Tasks`
+- `Grades`
+- `Calendar`
+- `Missions`
+- `Notices`
+- `Forum`
+- `Quiz`
 - `Analytics`
 - `Settings`
 - `Profile`
@@ -92,10 +99,17 @@ src/
     mockData.ts
   pages/
     AnalyticsPage.tsx
+    CalendarPage.tsx
+    ExplorePage.tsx
     FeedPage.tsx
+    ForumPage.tsx
+    GradesPage.tsx
     LandingPage.tsx
     MessagesPage.tsx
+    MissionsPage.tsx
+    NoticesPage.tsx
     ProfilePage.tsx
+    QuizPage.tsx
     SettingsPage.tsx
     TasksPage.tsx
   styles/

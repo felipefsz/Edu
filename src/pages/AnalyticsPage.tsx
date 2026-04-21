@@ -38,8 +38,8 @@ export function AnalyticsPage() {
           <div className="metric-grid">
             <MetricTile label="Feed interactions" value={teacherAnalytics.totalPostInteractions} accent="blue" />
             <MetricTile label="Avg engagement per post" value={teacherAnalytics.averageEngagementPerPost} accent="green" />
-            <MetricTile label="At-risk students" value={teacherAnalytics.atRiskStudents.length} accent="yellow" />
-            <MetricTile label="Tracked missions" value={teacherAnalytics.missionCompletion.length} accent="pink" />
+            <MetricTile label="Forum topics" value={teacherAnalytics.totalForumTopics} accent="yellow" />
+            <MetricTile label="Quiz responses" value={teacherAnalytics.totalQuizResponses} accent="pink" />
           </div>
 
           <div className="page-grid page-grid--analytics">

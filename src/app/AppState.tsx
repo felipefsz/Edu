@@ -43,6 +43,13 @@ interface CreateNoticeInput {
   pinned?: boolean;
 }
 
+interface CreateForumTopicInput {
+  title: string;
+  body: string;
+  classroom?: string;
+  tags: string[];
+}
+
 interface AppContextValue {
   state: AppState;
   currentUser: ReturnType<typeof getCurrentUser>;
@@ -72,6 +79,10 @@ interface AppContextValue {
   submitTask: (taskId: string, note: string, attachments: string[]) => void;
   reviewTaskSubmission: (taskId: string, userId: string, feedback: string, score?: number) => void;
   createNotice: (input: CreateNoticeInput) => void;
+  createForumTopic: (input: CreateForumTopicInput) => void;
+  replyForumTopic: (topicId: string, body: string) => void;
+  toggleForumResolved: (topicId: string) => void;
+  submitQuiz: (quizId: string, answers: number[]) => void;
   toggleFollow: (targetUserId: string) => void;
   completeMission: (missionId: string) => void;
   resetDemoState: () => void;
@@ -683,6 +694,124 @@ export function AppProvider({ children }: PropsWithChildren) {
     }));
   };
 
+  const createForumTopic = (input: CreateForumTopicInput) => {
+    if (!currentUser || !input.title.trim() || !input.body.trim()) return;
+
+    setState((currentState) => ({
+      ...currentState,
+      forumTopics: [
+        {
+          id: makeId('forum'),
+          title: input.title.trim(),
+          body: input.body.trim(),
+          authorId: currentUser.id,
+          classroom: input.classroom || currentUser.classroom,
+          tags: input.tags.map((tag) => tag.trim().toLowerCase()).filter(Boolean),
+          createdAt: new Date().toISOString(),
+          resolved: false,
+          replies: [],
+        },
+        ...currentState.forumTopics,
+      ],
+      notifications: [
+        createNotification(
+          state.preferences.language === 'en'
+            ? `${currentUser.name} opened a forum topic.`
+            : `${currentUser.name} abriu um topico no forum.`,
+          'social',
+          'forum',
+        ),
+        ...currentState.notifications,
+      ],
+    }));
+  };
+
+  const replyForumTopic = (topicId: string, body: string) => {
+    if (!currentUser || !body.trim()) return;
+
+    setState((currentState) => ({
+      ...currentState,
+      forumTopics: currentState.forumTopics.map((topic) =>
+        topic.id !== topicId
+          ? topic
+          : {
+              ...topic,
+              replies: [
+                ...topic.replies,
+                {
+                  id: makeId('forum-reply'),
+                  authorId: currentUser.id,
+                  body: body.trim(),
+                  createdAt: new Date().toISOString(),
+                },
+              ],
+            },
+      ),
+      notifications: [
+        createNotification(
+          state.preferences.language === 'en'
+            ? `${currentUser.name} replied in the forum.`
+            : `${currentUser.name} respondeu no forum.`,
+          'social',
+          'forum',
+          topicId,
+        ),
+        ...currentState.notifications,
+      ],
+    }));
+  };
+
+  const toggleForumResolved = (topicId: string) => {
+    if (!currentUser || currentUser.role !== 'teacher') return;
+
+    setState((currentState) => ({
+      ...currentState,
+      forumTopics: currentState.forumTopics.map((topic) =>
+        topic.id === topicId ? { ...topic, resolved: !topic.resolved } : topic,
+      ),
+    }));
+  };
+
+  const submitQuiz = (quizId: string, answers: number[]) => {
+    if (!currentUser || currentUser.role !== 'student') return;
+
+    setState((currentState) => ({
+      ...currentState,
+      quizzes: currentState.quizzes.map((quiz) => {
+        if (quiz.id !== quizId) return quiz;
+
+        const correctAnswers = quiz.questions.filter(
+          (question, index) => answers[index] === question.correctOptionIndex,
+        ).length;
+        const score = Number(((correctAnswers / Math.max(quiz.questions.length, 1)) * 10).toFixed(1));
+        const nextResponse = {
+          userId: currentUser.id,
+          answers,
+          score,
+          submittedAt: new Date().toISOString(),
+        };
+
+        return {
+          ...quiz,
+          responses: quiz.responses.some((response) => response.userId === currentUser.id)
+            ? quiz.responses.map((response) => (response.userId === currentUser.id ? nextResponse : response))
+            : [...quiz.responses, nextResponse],
+        };
+      }),
+      notifications: [
+        createNotification(
+          state.preferences.language === 'en'
+            ? `${currentUser.name} finished a quiz.`
+            : `${currentUser.name} finalizou um quiz.`,
+          'academic',
+          'quiz',
+          quizId,
+        ),
+        ...currentState.notifications,
+      ],
+    }));
+  };
+
   const toggleFollow = (targetUserId: string) => {
     if (!currentUser || currentUser.id === targetUserId) return;
 
@@ -809,6 +938,10 @@ export function AppProvider({ children }: PropsWithChildren) {
     submitTask,
     reviewTaskSubmission,
     createNotice,
+    createForumTopic,
+    replyForumTopic,
+    toggleForumResolved,
+    submitQuiz,
     toggleFollow,
     completeMission,
     resetDemoState,

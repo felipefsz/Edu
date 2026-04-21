@@ -3,12 +3,15 @@ export type ThemeMode = 'dark' | 'light';
 export type Language = 'pt' | 'en';
 export type PageKey =
   | 'feed'
+  | 'explore'
   | 'messages'
   | 'tasks'
   | 'grades'
   | 'calendar'
   | 'missions'
   | 'notices'
+  | 'forum'
+  | 'quiz'
   | 'analytics'
   | 'settings';
 export type NotificationType = 'social' | 'academic' | 'message' | 'system';
@@ -128,6 +131,50 @@ export interface Notice {
   classroom?: string;
 }
 
+export interface ForumReply {
+  id: string;
+  authorId: string;
+  body: string;
+  createdAt: string;
+}
+
+export interface ForumTopic {
+  id: string;
+  title: string;
+  body: string;
+  authorId: string;
+  classroom?: string;
+  tags: string[];
+  createdAt: string;
+  resolved: boolean;
+  replies: ForumReply[];
+}
+
+export interface QuizQuestion {
+  id: string;
+  prompt: string;
+  options: string[];
+  correctOptionIndex: number;
+}
+
+export interface QuizResponse {
+  userId: string;
+  answers: number[];
+  score: number;
+  submittedAt: string;
+}
+
+export interface Quiz {
+  id: string;
+  title: string;
+  description: string;
+  subject: string;
+  classroom?: string;
+  closesAt: string;
+  questions: QuizQuestion[];
+  responses: QuizResponse[];
+}
+
 export interface AppNotification {
   id: string;
   type: NotificationType;
@@ -185,6 +232,8 @@ export interface AppState {
   directThreads: DirectThread[];
   tasks: Task[];
   notices: Notice[];
+  forumTopics: ForumTopic[];
+  quizzes: Quiz[];
   notifications: AppNotification[];
   missions: Mission[];
   preferences: Preferences;
@@ -194,7 +243,7 @@ export interface AppState {
 
 export interface SearchResult {
   id: string;
-  type: 'user' | 'chat' | 'post' | 'task' | 'notice';
+  type: 'user' | 'chat' | 'post' | 'task' | 'notice' | 'forum' | 'quiz';
   title: string;
   subtitle: string;
   targetPage: PageKey | 'profile';
