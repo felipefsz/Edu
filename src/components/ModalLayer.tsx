@@ -24,6 +24,7 @@ export function ModalLayer() {
   } = useApp();
   const navigate = useNavigate();
   const modal = state.ui.modal;
+  const unreadCount = getUnreadNotificationsCount(state, currentUser);
   const [quoteBody, setQuoteBody] = useState('');
   const [groupTitle, setGroupTitle] = useState('');
   const [groupDescription, setGroupDescription] = useState('');
@@ -31,10 +32,19 @@ export function ModalLayer() {
   const [membersVisibleToStudents, setMembersVisibleToStudents] = useState(true);
 
   useEffect(() => {
-    if (modal?.type === 'notifications') {
+    if (modal?.type === 'notifications' && unreadCount > 0) {
       markNotificationsSeen();
     }
-  }, [markNotificationsSeen, modal]);
+  }, [markNotificationsSeen, modal?.type, unreadCount]);
+
+  useEffect(() => {
+    if (!modal) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [modal]);
 
   useEffect(() => {
     if (modal?.type === 'quoteComposer') {
@@ -55,19 +65,18 @@ export function ModalLayer() {
 
   if (modal.type === 'notifications') {
     const notifications = getNotificationsForUser(state, currentUser);
-    const unreadCount = getUnreadNotificationsCount(state, currentUser);
 
     return (
-      <div className="modal-backdrop" onClick={closeModal}>
-        <div className="modal-panel modal-panel--narrow" onClick={(event) => event.stopPropagation()}>
-          <div className="modal-header">
+      <div className="modal-backdrop modal-backdrop--fade" onClick={closeModal}>
+        <div className="modal-panel modal-panel--narrow modal-panel--scale" onClick={(event) => event.stopPropagation()}>
+          <div className="modal-header modal-header--sticky">
             <div>
               <div className="modal-eyebrow">{t('notifications')}</div>
               <h2 className="modal-title">
                 {state.preferences.language === 'en' ? `Inbox / ${unreadCount}` : `Caixa / ${unreadCount}`}
               </h2>
             </div>
-            <button type="button" className="toolbar-button" onClick={closeModal} title={t('close')}>
+            <button type="button" className="toolbar-button toolbar-button--icon" onClick={closeModal} title={t('close')}>
               <X size={16} />
             </button>
           </div>
@@ -101,20 +110,54 @@ export function ModalLayer() {
     );
   }
 
+  if (modal.type === 'postDetails') {
+    const post = getPostById(state, modal.postId);
+
+    return (
+      <div className="modal-backdrop modal-backdrop--fade" onClick={closeModal}>
+        <div className="modal-panel modal-panel--wide modal-panel--scale" onClick={(event) => event.stopPropagation()}>
+          <div className="modal-header modal-header--sticky">
+            <div>
+              <div className="modal-eyebrow">
+                {state.preferences.language === 'en' ? 'Post details' : 'Detalhes da publicacao'}
+              </div>
+              <h2 className="modal-title">
+                {state.preferences.language === 'en' ? 'Conversation thread' : 'Conversa da publicacao'}
+              </h2>
+            </div>
+            <button type="button" className="toolbar-button toolbar-button--icon" onClick={closeModal} title={t('close')}>
+              <X size={16} />
+            </button>
+          </div>
+
+          <div className="modal-body stack-gap">
+            {post ? (
+              <PostCard post={post} forceComments />
+            ) : (
+              <div className="empty-panel">
+                {state.preferences.language === 'en' ? 'Post not found.' : 'Publicacao nao encontrada.'}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (modal.type === 'quoteComposer') {
     const sourcePost = getPostById(state, modal.sourcePostId);
 
     return (
-      <div className="modal-backdrop" onClick={closeModal}>
-        <div className="modal-panel modal-panel--wide" onClick={(event) => event.stopPropagation()}>
-          <div className="modal-header">
+      <div className="modal-backdrop modal-backdrop--fade" onClick={closeModal}>
+        <div className="modal-panel modal-panel--wide modal-panel--scale" onClick={(event) => event.stopPropagation()}>
+          <div className="modal-header modal-header--sticky">
             <div>
               <div className="modal-eyebrow">{t('quote')}</div>
               <h2 className="modal-title">
                 {state.preferences.language === 'en' ? 'Write your context' : 'Escreva seu contexto'}
               </h2>
             </div>
-            <button type="button" className="toolbar-button" onClick={closeModal} title={t('close')}>
+            <button type="button" className="toolbar-button toolbar-button--icon" onClick={closeModal} title={t('close')}>
               <X size={16} />
             </button>
           </div>
@@ -155,9 +198,9 @@ export function ModalLayer() {
 
   if (modal.type === 'groupEditor') {
     return (
-      <div className="modal-backdrop" onClick={closeModal}>
-        <div className="modal-panel modal-panel--narrow" onClick={(event) => event.stopPropagation()}>
-          <div className="modal-header">
+      <div className="modal-backdrop modal-backdrop--fade" onClick={closeModal}>
+        <div className="modal-panel modal-panel--narrow modal-panel--scale" onClick={(event) => event.stopPropagation()}>
+          <div className="modal-header modal-header--sticky">
             <div>
               <div className="modal-eyebrow">
                 {state.preferences.language === 'en' ? 'Group management' : 'Gestao do grupo'}
@@ -166,7 +209,7 @@ export function ModalLayer() {
                 {state.preferences.language === 'en' ? 'Edit group details' : 'Editar detalhes do grupo'}
               </h2>
             </div>
-            <button type="button" className="toolbar-button" onClick={closeModal} title={t('close')}>
+            <button type="button" className="toolbar-button toolbar-button--icon" onClick={closeModal} title={t('close')}>
               <X size={16} />
             </button>
           </div>
@@ -245,9 +288,9 @@ export function ModalLayer() {
   const previewPosts = posts.slice(0, 3);
 
   return (
-    <div className="modal-backdrop" onClick={closeModal}>
-      <div className="modal-panel modal-panel--wide" onClick={(event) => event.stopPropagation()}>
-        <div className="modal-header">
+    <div className="modal-backdrop modal-backdrop--fade" onClick={closeModal}>
+      <div className="modal-panel modal-panel--wide modal-panel--scale" onClick={(event) => event.stopPropagation()}>
+        <div className="modal-header modal-header--sticky">
           <div>
             <div className="modal-eyebrow">{t('profile')}</div>
             <h2 className="modal-title">{profileUser?.name}</h2>
@@ -255,7 +298,7 @@ export function ModalLayer() {
           <div className="modal-actions-right">
             <button
               type="button"
-              className="toolbar-button"
+              className="toolbar-button toolbar-button--icon"
               onClick={() => {
                 closeModal();
                 navigate(`/profile/${profileUser?.id}`);
@@ -266,7 +309,7 @@ export function ModalLayer() {
             </button>
             <button
               type="button"
-              className="toolbar-button"
+              className="toolbar-button toolbar-button--icon"
               onClick={() => {
                 if (window.history.length > 1) {
                   navigate(-1);
@@ -278,7 +321,7 @@ export function ModalLayer() {
             >
               <ArrowLeft size={16} />
             </button>
-            <button type="button" className="toolbar-button" onClick={closeModal} title={t('close')}>
+            <button type="button" className="toolbar-button toolbar-button--icon" onClick={closeModal} title={t('close')}>
               <X size={16} />
             </button>
           </div>

@@ -209,6 +209,7 @@ export interface Preferences {
 
 export type ModalState =
   | { type: 'notifications' }
+  | { type: 'postDetails'; postId: string }
   | { type: 'quoteComposer'; sourcePostId: string }
   | { type: 'groupEditor'; groupId: string }
   | { type: 'profilePreview'; userId: string };

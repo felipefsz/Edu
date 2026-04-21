@@ -2,6 +2,7 @@ import {
   Bookmark,
   Heart,
   Languages,
+  Maximize2,
   MessageCircle,
   Quote,
   Repeat2,
@@ -14,9 +15,10 @@ import { formatRelativeDate, getPostById, getUserById } from '../utils/selectors
 interface PostCardProps {
   post: Post;
   compact?: boolean;
+  forceComments?: boolean;
 }
 
-export function PostCard({ post, compact = false }: PostCardProps) {
+export function PostCard({ post, compact = false, forceComments = false }: PostCardProps) {
   const {
     addComment,
     currentUser,
@@ -38,6 +40,7 @@ export function PostCard({ post, compact = false }: PostCardProps) {
   const targetLanguage: Language = state.preferences.language === 'pt' ? 'en' : 'pt';
   const translatedBody = post.bodyTranslations?.[targetLanguage];
   const displayBody = showTranslation && translatedBody ? translatedBody : post.body;
+  const commentsVisible = forceComments || showComments;
   const translationLabel = useMemo(
     () =>
       targetLanguage === 'en'
@@ -62,7 +65,19 @@ export function PostCard({ post, compact = false }: PostCardProps) {
             </small>
           </span>
         </button>
-        {post.pinned ? <span className="status-pill status-pill--accent">{t('pinned')}</span> : null}
+        <div className="toolbar-cluster">
+          {post.pinned ? <span className="status-pill status-pill--accent">{t('pinned')}</span> : null}
+          {!compact && !forceComments ? (
+            <button
+              className="toolbar-button toolbar-button--icon"
+              type="button"
+              onClick={() => openModal({ type: 'postDetails', postId: post.id })}
+              title={state.preferences.language === 'en' ? 'Open post' : 'Abrir publicacao'}
+            >
+              <Maximize2 size={15} />
+            </button>
+          ) : null}
+        </div>
       </header>
 
       <div className="post-card__body feed-card-body">
@@ -117,8 +132,8 @@ export function PostCard({ post, compact = false }: PostCardProps) {
         </button>
         <button
           type="button"
-          className={showComments ? 'feed-action feed-action--commented' : 'feed-action'}
-          onClick={() => setShowComments((value) => !value)}
+          className={commentsVisible ? 'feed-action feed-action--commented' : 'feed-action'}
+          onClick={() => forceComments ? undefined : setShowComments((value) => !value)}
           title={t('comments')}
         >
           <MessageCircle size={16} />
@@ -146,7 +161,7 @@ export function PostCard({ post, compact = false }: PostCardProps) {
         </button>
       </footer>
 
-      {showComments ? (
+      {commentsVisible ? (
         <div className="post-comments">
           {post.comments.map((comment) => {
             const commentAuthor = getUserById(state, comment.authorId);
