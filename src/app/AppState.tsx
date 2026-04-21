@@ -2,6 +2,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useRef,
   useState,
   type PropsWithChildren,
 } from 'react';
@@ -173,10 +174,15 @@ function withToast(ui: AppState['ui'], message: string, type: ToastType = 'succe
 
 export function AppProvider({ children }: PropsWithChildren) {
   const [state, setState] = useState<AppState>(() => hydrateState());
+  const persistTimerRef = useRef<number | null>(null);
   const currentUser = getCurrentUser(state);
   const currentRole = currentUser?.role ?? null;
 
   useEffect(() => {
+    if (persistTimerRef.current) {
+      window.clearTimeout(persistTimerRef.current);
+    }
+
     const stateToPersist: AppState = {
       ...state,
       ui: {
@@ -188,7 +194,16 @@ export function AppProvider({ children }: PropsWithChildren) {
         toasts: [],
       },
     };
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToPersist));
+
+    persistTimerRef.current = window.setTimeout(() => {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToPersist));
+    }, 260);
+
+    return () => {
+      if (persistTimerRef.current) {
+        window.clearTimeout(persistTimerRef.current);
+      }
+    };
   }, [state]);
 
   useEffect(() => {

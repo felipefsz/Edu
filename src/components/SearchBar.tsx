@@ -1,5 +1,5 @@
 import { Search, UserRound, Users, MessageSquareText, FileText, BellRing, NotebookTabs, HelpCircle } from 'lucide-react';
-import { useDeferredValue, useEffect, useRef } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../app/AppState';
 import type { SearchResult } from '../app/types';
@@ -20,7 +20,20 @@ export function SearchBar() {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const deferredQuery = useDeferredValue(state.ui.searchQuery);
-  const results = buildSearchResults(state, deferredQuery);
+  const results = useMemo(
+    () => buildSearchResults(state, deferredQuery),
+    [
+      deferredQuery,
+      state.chatGroups,
+      state.directThreads,
+      state.forumTopics,
+      state.notices,
+      state.posts,
+      state.quizzes,
+      state.tasks,
+      state.users,
+    ],
+  );
   const shouldShowDropdown = state.ui.searchOpen && state.ui.searchQuery.trim().length > 1;
 
   useEffect(() => {
@@ -63,7 +76,7 @@ export function SearchBar() {
 
   return (
     <div
-      className="search-slot"
+      className={state.ui.searchOpen ? 'search-slot search-slot--open' : 'search-slot'}
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) {
           setSearchOpen(false);

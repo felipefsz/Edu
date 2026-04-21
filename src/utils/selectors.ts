@@ -91,7 +91,7 @@ export function getTrendingTags(state: AppState) {
 
   return [...counter.entries()]
     .map(([tag, count]) => ({ tag, count }))
-    .sort((left, right) => right.count - left.count);
+    .sort((left, right) => right.count - left.count || left.tag.localeCompare(right.tag));
 }
 
 export function getOpenMissions(state: AppState, currentUser: User | null) {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MetricTile } from '../components/ChartBlocks';
 import { PostCard } from '../components/PostCard';
 import { useApp } from '../app/AppState';
@@ -31,6 +31,7 @@ export function FeedPage() {
   const [sortMode, setSortMode] = useState<'latest' | 'trending'>('latest');
   const [feedFilter, setFeedFilter] = useState<'all' | 'following' | 'class' | 'saved'>('all');
   const [hashtagFilter, setHashtagFilter] = useState('');
+  const [activeFeedChips, setActiveFeedChips] = useState<string[]>([]);
   const [visibleCount, setVisibleCount] = useState(6);
   const [noticeForm, setNoticeForm] = useState({
     title: '',
@@ -38,23 +39,8 @@ export function FeedPage() {
     classroom: '',
     pinned: false,
   });
-  const posts = getFeedPosts(state);
-  const visiblePosts = posts
-    .filter((post) => {
-      if (hashtagFilter && !post.tags.some((tag) => tag.toLowerCase() === hashtagFilter.toLowerCase())) return false;
-      if (!currentUser) return true;
-      if (feedFilter === 'following') return currentUser.followingIds.includes(post.authorId);
-      if (feedFilter === 'class') return Boolean(currentUser.classroom && post.classroom === currentUser.classroom);
-      if (feedFilter === 'saved') return post.savedByUserIds.includes(currentUser.id);
-      return true;
-    })
-    .sort((left, right) => {
-      if (sortMode === 'latest') return 0;
-      const leftScore = left.likeUserIds.length + left.comments.length + left.repostUserIds.length + left.savedByUserIds.length;
-      const rightScore = right.likeUserIds.length + right.comments.length + right.repostUserIds.length + right.savedByUserIds.length;
-      return rightScore - leftScore;
-    });
-  const trendingTags = getTrendingTags(state);
+  const posts = useMemo(() => getFeedPosts(state), [state.posts]);
+  const trendingTags = useMemo(() => getTrendingTags(state), [state.posts]);
   const missions = getOpenMissions(state, currentUser);
   const studentOverview = getStudentOverview(state, currentUser);
   const followSuggestions = getFollowSuggestions(state, currentUser);
@@ -63,6 +49,87 @@ export function FeedPage() {
   const allNoticeHighlights = getNoticeHighlights(state).slice(0, 2);
   const upcomingTasks = getUpcomingTasks(state, currentUser);
   const isEnglish = state.preferences.language === 'en';
+  const feedChips = useMemo(() => {
+    const chips = [
+      { id: 'teacher', label: isEnglish ? 'Teacher' : 'Professor' },
+      { id: 'comments', label: isEnglish ? 'With comments' : 'Com comentarios' },
+      { id: 'quotes', label: isEnglish ? 'Quotes' : 'Citacoes' },
+    ];
+
+    trendingTags.slice(0, 3).forEach((trend) => chips.push({ id: `#${trend.tag}`, label: `#${trend.tag}` }));
+    return chips;
+  }, [isEnglish, trendingTags]);
+
+  const toggleFeedChip = (chipId: string) => {
+    if (chipId === 'all') {
+      setActiveFeedChips([]);
+      setHashtagFilter('');
+      setFeedFilter('all');
+      return;
+    }
+
+    setActiveFeedChips((current) =>
+      current.includes(chipId)
+        ? current.filter((id) => id !== chipId)
+        : [...current, chipId],
+    );
+  };
+
+  const selectHashtag = (tag: string) => {
+    setFeedFilter('all');
+    setActiveFeedChips([]);
+    setHashtagFilter(tag);
+    setVisibleCount(6);
+  };
+
+  const visiblePosts = useMemo(() => {
+    const currentClassroom = currentUser?.classroom;
+    const authorClassroom = (authorId: string) =>
+      state.users.find((user) => user.id === authorId)?.classroom;
+    const matchesChip = (post: (typeof posts)[number], chipId: string) => {
+      if (chipId === 'teacher') return post.authorId === state.teacherId;
+      if (chipId === 'comments') return post.comments.length > 0;
+      if (chipId === 'quotes') return post.kind === 'quote' || post.kind === 'repost';
+      if (chipId.startsWith('#')) {
+        const tag = chipId.slice(1).toLowerCase();
+        return post.tags.some((item) => item.toLowerCase() === tag) || post.body.toLowerCase().includes(tag);
+      }
+      return true;
+    };
+
+    return posts
+      .filter((post) => {
+        if (hashtagFilter) {
+          const tag = hashtagFilter.toLowerCase();
+          if (!post.tags.some((item) => item.toLowerCase() === tag) && !post.body.toLowerCase().includes(tag)) return false;
+        }
+
+        if (activeFeedChips.length && !activeFeedChips.some((chipId) => matchesChip(post, chipId))) return false;
+        if (!currentUser) return true;
+
+        if (feedFilter === 'following') {
+          return post.authorId === state.teacherId || post.authorId === currentUser.id || currentUser.followingIds.includes(post.authorId);
+        }
+
+        if (feedFilter === 'class') {
+          if (!currentClassroom) return post.authorId === state.teacherId || post.authorId === currentUser.id;
+          return post.authorId === state.teacherId || post.classroom === currentClassroom || authorClassroom(post.authorId) === currentClassroom;
+        }
+
+        if (feedFilter === 'saved') return post.savedByUserIds.includes(currentUser.id);
+        return true;
+      })
+      .sort((left, right) => {
+        if (sortMode === 'latest') return 0;
+        const leftScore = left.likeUserIds.length + left.comments.length + left.repostUserIds.length + left.savedByUserIds.length + (left.pinned ? 2 : 0);
+        const rightScore = right.likeUserIds.length + right.comments.length + right.repostUserIds.length + right.savedByUserIds.length + (right.pinned ? 2 : 0);
+        return rightScore - leftScore || new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
+      });
+  }, [activeFeedChips, currentUser, feedFilter, hashtagFilter, posts, sortMode, state.teacherId, state.users]);
+
+  useEffect(() => {
+    setVisibleCount(6);
+  }, [activeFeedChips, feedFilter, hashtagFilter, sortMode]);
 
   return (
     <div className="page-grid page-grid--feed">
@@ -245,6 +312,25 @@ export function FeedPage() {
               </button>
             ) : null}
           </div>
+          <div className="feed-filter-row feed-filter-row--chips">
+            <button
+              className={!activeFeedChips.length && !hashtagFilter ? 'tag-pill tag-pill--button' : 'ghost-button ghost-button--slim'}
+              type="button"
+              onClick={() => toggleFeedChip('all')}
+            >
+              ✦ {isEnglish ? 'All chips' : 'Todos'}
+            </button>
+            {feedChips.map((chip) => (
+              <button
+                key={chip.id}
+                className={activeFeedChips.includes(chip.id) ? 'tag-pill tag-pill--button' : 'ghost-button ghost-button--slim'}
+                type="button"
+                onClick={() => chip.id.startsWith('#') ? selectHashtag(chip.id.slice(1)) : toggleFeedChip(chip.id)}
+              >
+                {chip.label}
+              </button>
+            ))}
+          </div>
         </section>
 
         <section className="stack-gap">
@@ -274,7 +360,7 @@ export function FeedPage() {
           {currentRole === 'teacher' ? (
             <div className="stack-gap-sm">
               {trendingTags.slice(0, 4).map((trend) => (
-                <button key={trend.tag} type="button" className="list-card list-card--button" onClick={() => setHashtagFilter(trend.tag)}>
+                <button key={trend.tag} type="button" className="list-card list-card--button" onClick={() => selectHashtag(trend.tag)}>
                   <strong>#{trend.tag}</strong>
                   <small>{isEnglish ? `${trend.count} posts in the stream` : `${trend.count} posts em circulacao`}</small>
                 </button>

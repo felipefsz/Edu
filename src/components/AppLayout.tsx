@@ -8,6 +8,7 @@ import {
   HelpCircle,
   LayoutDashboard,
   LogOut,
+  Menu,
   Megaphone,
   MessageSquare,
   MoonStar,
@@ -16,6 +17,7 @@ import {
   SunMedium,
   Trophy,
   UserRound,
+  X,
 } from 'lucide-react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
@@ -53,7 +55,64 @@ export function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [showTopButton, setShowTopButton] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigation = buildNavigation(currentUser);
+
+  const renderSidebarContent = (isDrawer = false) => (
+    <>
+      <div className="brand-block">
+        <div className="brand-title">{t('appName')}</div>
+        <div className="brand-subtitle">{t('appSubtitle')}</div>
+      </div>
+
+      <div className="sidebar-section-label">
+        {currentRole === 'teacher' ? t('teacherMode') : t('studentMode')}
+      </div>
+
+      <nav className="sidebar-nav">
+        {navigation.map((item) => {
+          const Icon = iconMap[item.key];
+          return (
+            <NavLink
+              key={item.key}
+              to={`/${item.key}`}
+              onClick={() => isDrawer && setSidebarOpen(false)}
+              className={({ isActive }) =>
+                isActive ? 'nav-button nav-button--active' : 'nav-button'
+              }
+            >
+              <Icon size={17} />
+              <span>{t(item.key)}</span>
+            </NavLink>
+          );
+        })}
+      </nav>
+
+      <div className="sidebar-card">
+        <div className="sidebar-card__eyebrow">{state.preferences.language === 'en' ? 'Session' : 'Sessao'}</div>
+        <button
+          className="profile-chip"
+          type="button"
+          onClick={() => {
+            setSidebarOpen(false);
+            navigate(`/profile/${currentUser?.id}`);
+          }}
+        >
+          <span className="avatar-pill" style={{ background: currentUser?.avatarTone }}>
+            {currentUser?.name.slice(0, 1)}
+          </span>
+          <span>
+            <strong>{currentUser?.name}</strong>
+            <small>{currentUser?.role === 'teacher' ? t('teacherLabel') : `${t('classLabel')} ${currentUser?.classroom}`}</small>
+          </span>
+        </button>
+        <button className="ghost-button ghost-button--full" type="button" onClick={logout}>
+          <LogOut size={16} />
+          <span>{t('logout')}</span>
+        </button>
+      </div>
+    </>
+  );
 
   useEffect(() => {
     const onScroll = () => {
@@ -64,60 +123,56 @@ export function AppLayout() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSidebarOpen(false);
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <div className="brand-block">
-          <div className="brand-title">{t('appName')}</div>
-          <div className="brand-subtitle">{t('appSubtitle')}</div>
-        </div>
-
-        <div className="sidebar-section-label">
-          {currentRole === 'teacher' ? t('teacherMode') : t('studentMode')}
-        </div>
-
-        <nav className="sidebar-nav">
-          {navigation.map((item) => {
-            const Icon = iconMap[item.key];
-            return (
-              <NavLink
-                key={item.key}
-                to={`/${item.key}`}
-                className={({ isActive }) =>
-                  isActive ? 'nav-button nav-button--active' : 'nav-button'
-                }
-              >
-                <Icon size={17} />
-                <span>{t(item.key)}</span>
-              </NavLink>
-            );
-          })}
-        </nav>
-
-        <div className="sidebar-card">
-          <div className="sidebar-card__eyebrow">{state.preferences.language === 'en' ? 'Session' : 'Sessao'}</div>
-          <button
-            className="profile-chip"
-            type="button"
-            onClick={() => navigate(`/profile/${currentUser?.id}`)}
-          >
-            <span className="avatar-pill" style={{ background: currentUser?.avatarTone }}>
-              {currentUser?.name.slice(0, 1)}
-            </span>
-            <span>
-              <strong>{currentUser?.name}</strong>
-              <small>{currentUser?.role === 'teacher' ? t('teacherLabel') : `${t('classLabel')} ${currentUser?.classroom}`}</small>
-            </span>
-          </button>
-          <button className="ghost-button ghost-button--full" type="button" onClick={logout}>
-            <LogOut size={16} />
-            <span>{t('logout')}</span>
-          </button>
-        </div>
+        {renderSidebarContent()}
       </aside>
+
+      {sidebarOpen ? (
+        <button
+          className="sidebar-overlay"
+          type="button"
+          aria-label={state.preferences.language === 'en' ? 'Close menu' : 'Fechar menu'}
+          onClick={() => setSidebarOpen(false)}
+        />
+      ) : null}
+
+      {sidebarOpen ? (
+        <aside className="mobile-sidebar mobile-sidebar--open" aria-label={state.preferences.language === 'en' ? 'Main menu' : 'Menu principal'}>
+          <div className="mobile-sidebar__top">
+            <span>{t('appName')}</span>
+            <button className="toolbar-button toolbar-button--icon" type="button" onClick={() => setSidebarOpen(false)}>
+              <X size={16} />
+            </button>
+          </div>
+          {renderSidebarContent(true)}
+        </aside>
+      ) : null}
 
       <div className="content-shell">
         <header className="topbar">
+          <button
+            className="toolbar-button toolbar-button--icon menu-toggle"
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            aria-label={state.preferences.language === 'en' ? 'Open menu' : 'Abrir menu'}
+          >
+            <Menu size={17} />
+          </button>
           <div className="topbar-title">
             <div className="topbar-title__eyebrow">
               {currentRole === 'teacher' ? t('teacherMode') : t('studentMode')}
