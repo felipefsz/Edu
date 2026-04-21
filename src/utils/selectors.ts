@@ -67,6 +67,18 @@ export function getAverageGrade(user: User) {
   return grades.reduce((total, grade) => total + grade, 0) / grades.length;
 }
 
+export function getGradeRows(user: User | null) {
+  if (!user) return [];
+  return Object.entries(user.gradeBySubject)
+    .map(([subject, grade]) => ({
+      subject,
+      grade,
+      gapToGoal: Number((grade - user.goalGrade).toFixed(1)),
+      status: grade >= user.goalGrade ? 'on-track' : grade >= 7 ? 'attention' : 'risk',
+    }))
+    .sort((left, right) => right.grade - left.grade);
+}
+
 export function getTrendingTags(state: AppState) {
   const counter = new Map<string, number>();
 
@@ -87,6 +99,16 @@ export function getOpenMissions(state: AppState, currentUser: User | null) {
   return state.missions.filter(
     (mission) => mission.role === currentUser.role && !mission.doneByUserIds.includes(currentUser.id),
   );
+}
+
+export function getMissionsForUser(state: AppState, currentUser: User | null) {
+  if (!currentUser) return [];
+  return state.missions
+    .filter((mission) => mission.role === currentUser.role)
+    .map((mission) => ({
+      ...mission,
+      done: mission.doneByUserIds.includes(currentUser.id),
+    }));
 }
 
 export interface ThreadSummary {
@@ -383,6 +405,30 @@ export function getRelevantNotices(state: AppState, currentUser: User | null) {
   );
 }
 
+export function getCalendarItems(state: AppState, currentUser: User | null) {
+  const tasks = getVisibleTasks(state, currentUser).map((task) => ({
+    id: `task-${task.id}`,
+    type: 'task' as const,
+    title: task.title,
+    description: task.description,
+    date: task.deadline,
+    classroom: task.classroom,
+  }));
+
+  const notices = getRelevantNotices(state, currentUser).map((notice) => ({
+    id: `notice-${notice.id}`,
+    type: 'notice' as const,
+    title: notice.title,
+    description: notice.body,
+    date: notice.createdAt.slice(0, 10),
+    classroom: notice.classroom,
+  }));
+
+  return [...tasks, ...notices].sort(
+    (left, right) => new Date(left.date).getTime() - new Date(right.date).getTime(),
+  );
+}
+
 export function getStudentOverview(state: AppState, currentUser: User | null) {
   if (!currentUser) return null;
   const openTasks = getVisibleTasks(state, currentUser);
@@ -403,6 +449,10 @@ export function buildNavigation(currentUser: User | null) {
     { key: 'feed', label: 'Feed' },
     { key: 'messages', label: 'Messages' },
     { key: 'tasks', label: 'Tasks' },
+    { key: 'grades', label: 'Grades' },
+    { key: 'calendar', label: 'Calendar' },
+    { key: 'missions', label: 'Missions' },
+    { key: 'notices', label: 'Notices' },
     { key: 'analytics', label: 'Analytics' },
     { key: 'settings', label: 'Settings' },
   ];

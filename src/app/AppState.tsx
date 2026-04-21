@@ -9,6 +9,7 @@ import { seedState } from '../data/mockData';
 import {
   getCurrentUser,
   getPostById,
+  markMissionDone,
   nextNotificationReadState,
 } from '../utils/selectors';
 import { translate } from './translations';
@@ -72,6 +73,7 @@ interface AppContextValue {
   reviewTaskSubmission: (taskId: string, userId: string, feedback: string, score?: number) => void;
   createNotice: (input: CreateNoticeInput) => void;
   toggleFollow: (targetUserId: string) => void;
+  completeMission: (missionId: string) => void;
   resetDemoState: () => void;
 }
 
@@ -714,6 +716,26 @@ export function AppProvider({ children }: PropsWithChildren) {
     });
   };
 
+  const completeMission = (missionId: string) => {
+    if (!currentUser) return;
+
+    setState((currentState) => ({
+      ...currentState,
+      missions: markMissionDone(currentState.missions, missionId, currentUser.id),
+      notifications: [
+        createNotification(
+          state.preferences.language === 'en'
+            ? `${currentUser.name} completed a mission.`
+            : `${currentUser.name} concluiu uma missao.`,
+          'system',
+          'missions',
+          missionId,
+        ),
+        ...currentState.notifications,
+      ],
+    }));
+  };
+
   const submitTask = (taskId: string, note: string, attachments: string[]) => {
     if (!currentUser || currentUser.role !== 'student') return;
 
@@ -788,6 +810,7 @@ export function AppProvider({ children }: PropsWithChildren) {
     reviewTaskSubmission,
     createNotice,
     toggleFollow,
+    completeMission,
     resetDemoState,
   };
 

@@ -865,6 +865,97 @@ html[data-transparency='solid'] .floating-top-button {
   gap: 1rem;
 }
 
+.grade-grid,
+.calendar-grid,
+.mission-grid,
+.notice-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.grade-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.calendar-grid,
+.notice-grid {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.mission-grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.grade-card,
+.mission-card {
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent),
+    var(--surface-2);
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 0.5rem;
+}
+
+.grade-card span {
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+.grade-card small,
+.mission-card p,
+.notice-card p,
+.calendar-day-card small {
+  color: var(--text-2);
+}
+
+.grade-card--on-track {
+  box-shadow: inset 0 2px 0 rgba(31, 212, 122, 0.65), var(--shadow);
+}
+
+.grade-card--attention {
+  box-shadow: inset 0 2px 0 rgba(245, 165, 28, 0.65), var(--shadow);
+}
+
+.grade-card--risk {
+  box-shadow: inset 0 2px 0 rgba(240, 80, 104, 0.65), var(--shadow);
+}
+
+.calendar-day-card,
+.notice-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.calendar-day-card__date {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+}
+
+.calendar-day-card__date strong {
+  font-size: 1.2rem;
+}
+
+.mission-card {
+  align-content: space-between;
+}
+
+.mission-card h2,
+.notice-card h2 {
+  margin: 0;
+}
+
+.mission-card--done {
+  border-color: rgba(31, 212, 122, 0.28);
+  background:
+    linear-gradient(135deg, rgba(31, 212, 122, 0.13), transparent 60%),
+    var(--surface-2);
+}
+
 .task-card {
   display: grid;
   gap: 1rem;
@@ -1159,13 +1250,18 @@ html[data-chatDensity='compact'] .message-bubble {
     position: sticky;
     bottom: 0;
     z-index: 25;
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    display: flex;
+    overflow-x: auto;
     gap: 0.4rem;
     padding: 0.85rem 1rem 1rem;
     border-top: 1px solid var(--border);
     background: rgba(14, 16, 32, 0.8);
     backdrop-filter: blur(18px);
+  }
+
+  .mobile-nav__item {
+    min-width: 88px;
+    justify-content: center;
   }
 }
 

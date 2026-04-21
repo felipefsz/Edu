@@ -1,7 +1,16 @@
 export type Role = 'teacher' | 'student';
 export type ThemeMode = 'dark' | 'light';
 export type Language = 'pt' | 'en';
-export type PageKey = 'feed' | 'messages' | 'tasks' | 'analytics' | 'settings';
+export type PageKey =
+  | 'feed'
+  | 'messages'
+  | 'tasks'
+  | 'grades'
+  | 'calendar'
+  | 'missions'
+  | 'notices'
+  | 'analytics'
+  | 'settings';
 export type NotificationType = 'social' | 'academic' | 'message' | 'system';
 export type PostKind = 'regular' | 'repost' | 'quote';
 export type TaskSubmissionStatus = 'pending' | 'submitted' | 'reviewed';

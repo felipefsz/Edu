@@ -1,13 +1,17 @@
 import {
   BarChart3,
   Bell,
+  BookOpenCheck,
+  CalendarDays,
   Globe2,
   LayoutDashboard,
   LogOut,
+  Megaphone,
   MessageSquare,
   MoonStar,
   Settings,
   SunMedium,
+  Trophy,
   UserRound,
 } from 'lucide-react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -21,6 +25,10 @@ const iconMap = {
   feed: LayoutDashboard,
   messages: MessageSquare,
   tasks: Bell,
+  grades: BookOpenCheck,
+  calendar: CalendarDays,
+  missions: Trophy,
+  notices: Megaphone,
   analytics: BarChart3,
   settings: Settings,
 };
@@ -113,11 +121,19 @@ export function AppLayout() {
                 ? t('messagesHeadline')
                 : location.pathname.includes('/tasks')
                   ? t('tasksHeadline')
-                  : location.pathname.includes('/analytics')
-                    ? t('analyticsHeadline')
-                    : location.pathname.includes('/settings')
-                      ? t('settingsHeadline')
-                      : t('feedHeadline')}
+                  : location.pathname.includes('/grades')
+                    ? t('gradesHeadline')
+                    : location.pathname.includes('/calendar')
+                      ? t('calendarHeadline')
+                      : location.pathname.includes('/missions')
+                        ? t('missionsHeadline')
+                        : location.pathname.includes('/notices')
+                          ? t('noticesHeadline')
+                          : location.pathname.includes('/analytics')
+                            ? t('analyticsHeadline')
+                            : location.pathname.includes('/settings')
+                              ? t('settingsHeadline')
+                              : t('feedHeadline')}
             </div>
           </div>
 
