@@ -17,6 +17,7 @@ export function MessagesPage() {
   const summaries = getThreadSummaries(state, currentUser);
   const activeThread = getThreadById(state, state.ui.activeThreadId);
   const members = getThreadMembers(state, state.ui.activeThreadId);
+  const isEnglish = state.preferences.language === 'en';
 
   const sendCurrentMessage = () => {
     if (!activeThread) return;
@@ -33,7 +34,7 @@ export function MessagesPage() {
   return (
     <div className="page-grid page-grid--messages">
       <section className="panel-card">
-        <div className="panel-card__eyebrow">Threads</div>
+        <div className="panel-card__eyebrow">{isEnglish ? 'Threads' : 'Conversas'}</div>
         <div className="thread-list">
           {summaries.map((summary) => (
             <button
@@ -53,7 +54,7 @@ export function MessagesPage() {
       <section className="panel-card panel-card--conversation">
         <div className="conversation-header">
           <div>
-            <div className="panel-card__eyebrow">Conversation</div>
+            <div className="panel-card__eyebrow">{isEnglish ? 'Conversation' : 'Conversa'}</div>
             <h2 className="conversation-title">
               {isGroupThread(activeThread)
                 ? activeThread.title
@@ -98,7 +99,7 @@ export function MessagesPage() {
               );
             })
           ) : (
-            <div className="empty-panel">Select a conversation to start.</div>
+            <div className="empty-panel">{isEnglish ? 'Select a conversation to start.' : 'Selecione uma conversa para comecar.'}</div>
           )}
         </div>
 
@@ -113,25 +114,33 @@ export function MessagesPage() {
                 sendCurrentMessage();
               }
             }}
-            placeholder="Write a message..."
+            placeholder={isEnglish ? 'Write a message...' : 'Escreva uma mensagem...'}
           />
           <button
             className="solid-button"
             type="button"
             onClick={sendCurrentMessage}
           >
-            Send
+            {isEnglish ? 'Send' : 'Enviar'}
           </button>
         </div>
       </section>
 
       <aside className="panel-card">
-        <div className="panel-card__eyebrow">Group visibility</div>
+        <div className="panel-card__eyebrow">{isEnglish ? 'Group visibility' : 'Visibilidade do grupo'}</div>
         {isGroupThread(activeThread) ? (
           <>
             <div className="stack-gap-sm">
-              <div className="status-pill">{activeThread.permissions.studentsCanPost ? 'Students can post' : 'Teacher-only posting'}</div>
-              <div className="status-pill">{activeThread.permissions.membersVisibleToStudents ? 'Members visible' : 'Members hidden for students'}</div>
+              <div className="status-pill">
+                {activeThread.permissions.studentsCanPost
+                  ? isEnglish ? 'Students can post' : 'Alunos podem publicar'
+                  : isEnglish ? 'Teacher-only posting' : 'Apenas professor publica'}
+              </div>
+              <div className="status-pill">
+                {activeThread.permissions.membersVisibleToStudents
+                  ? isEnglish ? 'Members visible' : 'Membros visiveis'
+                  : isEnglish ? 'Members hidden for students' : 'Membros ocultos para alunos'}
+              </div>
             </div>
             {currentRole === 'teacher' || activeThread.permissions.membersVisibleToStudents ? (
               <div className="member-list">
@@ -142,18 +151,18 @@ export function MessagesPage() {
                     </span>
                     <span>
                       <strong>{member.name}</strong>
-                      <small>{member.role === 'teacher' ? 'Can edit' : 'Read / participate'}</small>
+                      <small>{member.role === 'teacher' ? (isEnglish ? 'Can edit' : 'Pode editar') : (isEnglish ? 'Read / participate' : 'Le / participa')}</small>
                     </span>
                   </button>
                 ))}
               </div>
             ) : (
-              <div className="muted-copy">The teacher hid the member list for this group.</div>
+              <div className="muted-copy">{isEnglish ? 'The teacher hid the member list for this group.' : 'O professor ocultou a lista de membros deste grupo.'}</div>
             )}
           </>
         ) : (
           <div className="muted-copy">
-            Direct thread with {members.find((member: User) => member.id !== currentUser?.id)?.name ?? 'student'}.
+            {isEnglish ? 'Direct thread with' : 'Conversa direta com'} {members.find((member: User) => member.id !== currentUser?.id)?.name ?? (isEnglish ? 'student' : 'aluno')}.
           </div>
         )}
       </aside>

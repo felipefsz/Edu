@@ -14,9 +14,10 @@ export function ProfilePage() {
   const posts = getProfilePosts(state, userId);
   const isOwnProfile = currentUser?.id === profileUser?.id;
   const isFollowing = Boolean(profileUser && currentUser?.followingIds.includes(profileUser.id));
+  const isEnglish = state.preferences.language === 'en';
 
   if (!profileUser) {
-    return <div className="panel-card">User not found.</div>;
+    return <div className="panel-card">{isEnglish ? 'User not found.' : 'Usuario nao encontrado.'}</div>;
   }
 
   const savedPosts = state.posts.filter((post) => post.savedByUserIds.includes(profileUser.id));
@@ -28,10 +29,10 @@ export function ProfilePage() {
     .filter(Boolean);
   const tabItems: Array<{ id: ProfileTab; label: string; count: number }> = [
     { id: 'posts', label: 'Posts', count: posts.length },
-    { id: 'saved', label: 'Salvos', count: savedPosts.length },
-    { id: 'followers', label: 'Seguidores', count: followerUsers.length },
-    { id: 'following', label: 'Seguindo', count: followingUsers.length },
-    { id: 'badges', label: 'Conquistas', count: profileUser.badges.length },
+    { id: 'saved', label: isEnglish ? 'Saved' : 'Salvos', count: savedPosts.length },
+    { id: 'followers', label: isEnglish ? 'Followers' : 'Seguidores', count: followerUsers.length },
+    { id: 'following', label: isEnglish ? 'Following' : 'Seguindo', count: followingUsers.length },
+    { id: 'badges', label: isEnglish ? 'Achievements' : 'Conquistas', count: profileUser.badges.length },
   ];
 
   const renderPeople = (users: typeof followerUsers) => (
@@ -41,10 +42,10 @@ export function ProfilePage() {
           <span className="avatar-pill" style={{ background: user.avatarTone }}>{user.name.slice(0, 1)}</span>
           <span>
             <strong>{user.name}</strong>
-            <small>{user.role === 'teacher' ? 'Professor' : `Turma ${user.classroom}`}</small>
+            <small>{user.role === 'teacher' ? (isEnglish ? 'Teacher' : 'Professor') : `${isEnglish ? 'Class' : 'Turma'} ${user.classroom}`}</small>
           </span>
         </button>
-      ) : null) : <div className="empty-panel">Nada para mostrar ainda.</div>}
+      ) : null) : <div className="empty-panel">{isEnglish ? 'Nothing to show yet.' : 'Nada para mostrar ainda.'}</div>}
     </div>
   );
 
@@ -60,31 +61,33 @@ export function ProfilePage() {
             <div className="profile-page-hero__topline">
               <div>
                 <div className="panel-card__eyebrow">
-                  {profileUser.role === 'teacher' ? 'Teacher profile' : `Class ${profileUser.classroom}`}
+                  {profileUser.role === 'teacher'
+                    ? isEnglish ? 'Teacher profile' : 'Perfil do professor'
+                    : `${isEnglish ? 'Class' : 'Turma'} ${profileUser.classroom}`}
                 </div>
                 <h1>{profileUser.name}</h1>
               </div>
               {!isOwnProfile ? (
                 <button className="ghost-button ghost-button--slim" type="button" onClick={() => toggleFollow(profileUser.id)}>
-                  {isFollowing ? 'Following' : 'Follow'}
+                  {isFollowing ? (isEnglish ? 'Following' : 'Seguindo') : (isEnglish ? 'Follow' : 'Seguir')}
                 </button>
               ) : null}
             </div>
             <p>{profileUser.bio}</p>
             <div className="profile-page-hero__stats">
-              <span className="status-pill">Average {getAverageGrade(profileUser).toFixed(1)}</span>
-              <span className="status-pill">Streak {profileUser.streak}</span>
-              <span className="status-pill">Level {profileUser.level}</span>
+              <span className="status-pill">{isEnglish ? 'Average' : 'Media'} {getAverageGrade(profileUser).toFixed(1)}</span>
+              <span className="status-pill">{isEnglish ? 'Streak' : 'Sequencia'} {profileUser.streak}</span>
+              <span className="status-pill">{isEnglish ? 'Level' : 'Nivel'} {profileUser.level}</span>
               <span className="status-pill">XP {profileUser.xp}</span>
             </div>
             <div className="profile-inline-metrics">
               <div>
                 <strong>{profileUser.followerIds.length}</strong>
-                <small>Followers</small>
+                <small>{isEnglish ? 'Followers' : 'Seguidores'}</small>
               </div>
               <div>
                 <strong>{profileUser.followingIds.length}</strong>
-                <small>Following</small>
+                <small>{isEnglish ? 'Following' : 'Seguindo'}</small>
               </div>
               <div>
                 <strong>{posts.length}</strong>
@@ -111,8 +114,8 @@ export function ProfilePage() {
 
       <section className="page-grid page-grid--feed">
         <div className="stack-gap">
-          {activeTab === 'posts' && (posts.length ? posts.map((post) => <PostCard key={post.id} post={post} />) : <div className="panel-card">Nenhum post ainda.</div>)}
-          {activeTab === 'saved' && (savedPosts.length ? savedPosts.map((post) => <PostCard key={post.id} post={post} />) : <div className="panel-card">Nenhum post salvo ainda.</div>)}
+          {activeTab === 'posts' && (posts.length ? posts.map((post) => <PostCard key={post.id} post={post} />) : <div className="panel-card">{isEnglish ? 'No posts yet.' : 'Nenhum post ainda.'}</div>)}
+          {activeTab === 'saved' && (savedPosts.length ? savedPosts.map((post) => <PostCard key={post.id} post={post} />) : <div className="panel-card">{isEnglish ? 'No saved posts yet.' : 'Nenhum post salvo ainda.'}</div>)}
           {activeTab === 'followers' ? renderPeople(followerUsers) : null}
           {activeTab === 'following' ? renderPeople(followingUsers) : null}
           {activeTab === 'badges' ? (
@@ -120,29 +123,29 @@ export function ProfilePage() {
               {profileUser.badges.length ? profileUser.badges.map((badge) => (
                 <button key={badge} className="badge-card" type="button">
                   <strong>{badge}</strong>
-                  <small>Conquista desbloqueada no percurso social.</small>
+                  <small>{isEnglish ? 'Achievement unlocked in the social journey.' : 'Conquista desbloqueada no percurso social.'}</small>
                 </button>
-              )) : <div className="empty-panel">Nenhuma conquista ainda.</div>}
+              )) : <div className="empty-panel">{isEnglish ? 'No achievements yet.' : 'Nenhuma conquista ainda.'}</div>}
             </section>
           ) : null}
         </div>
         <aside className="stack-gap">
           <section className="panel-card">
-            <div className="panel-card__eyebrow">Identity</div>
+            <div className="panel-card__eyebrow">{isEnglish ? 'Identity' : 'Identidade'}</div>
             <div className="stack-gap-sm">
               <div className="list-card">
                 <strong>Status</strong>
                 <small>{profileUser.status}</small>
               </div>
               <div className="list-card">
-                <strong>Role</strong>
-                <small>{profileUser.role === 'teacher' ? 'Teacher' : `Student · Class ${profileUser.classroom}`}</small>
+                <strong>{isEnglish ? 'Role' : 'Papel'}</strong>
+                <small>{profileUser.role === 'teacher' ? (isEnglish ? 'Teacher' : 'Professor') : `${isEnglish ? 'Student' : 'Aluno'} · ${isEnglish ? 'Class' : 'Turma'} ${profileUser.classroom}`}</small>
               </div>
             </div>
           </section>
 
           <section className="panel-card">
-            <div className="panel-card__eyebrow">Favorites</div>
+            <div className="panel-card__eyebrow">{isEnglish ? 'Favorites' : 'Favoritos'}</div>
             <div className="tag-list">
               {profileUser.favoriteSubjects.map((subject) => (
                 <span key={subject} className="tag-pill">
@@ -153,7 +156,7 @@ export function ProfilePage() {
           </section>
 
           <section className="panel-card">
-            <div className="panel-card__eyebrow">Badges</div>
+            <div className="panel-card__eyebrow">{isEnglish ? 'Badges' : 'Conquistas'}</div>
             <div className="tag-list">
               {profileUser.badges.map((badge) => (
                 <span key={badge} className="status-pill">

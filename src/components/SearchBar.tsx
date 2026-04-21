@@ -1,5 +1,5 @@
 import { Search, UserRound, Users, MessageSquareText, FileText, BellRing, NotebookTabs, HelpCircle } from 'lucide-react';
-import { useDeferredValue } from 'react';
+import { useDeferredValue, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../app/AppState';
 import type { SearchResult } from '../app/types';
@@ -18,8 +18,21 @@ const iconMap = {
 export function SearchBar() {
   const { openModal, setSearchOpen, setSearchQuery, state, selectThread, t } = useApp();
   const navigate = useNavigate();
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const deferredQuery = useDeferredValue(state.ui.searchQuery);
   const results = buildSearchResults(state, deferredQuery);
+  const shouldShowDropdown = state.ui.searchOpen && state.ui.searchQuery.trim().length > 1;
+
+  useEffect(() => {
+    if (state.ui.searchOpen) {
+      requestAnimationFrame(() => inputRef.current?.focus());
+    }
+  }, [state.ui.searchOpen]);
+
+  const closeSearch = () => {
+    setSearchQuery('');
+    setSearchOpen(false);
+  };
 
   const handleResult = (result: SearchResult) => {
     const { targetPage, targetId } = result;
@@ -45,32 +58,58 @@ export function SearchBar() {
       navigate(`/${targetPage}`);
     }
 
-    setSearchQuery('');
-    setSearchOpen(false);
+    closeSearch();
   };
 
   return (
-    <div className="search-slot">
+    <div
+      className="search-slot"
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          setSearchOpen(false);
+        }
+      }}
+    >
       <div className={state.ui.searchOpen ? 'search-inline search-inline--open' : 'search-inline'}>
-        <button type="button" className="search-icon-button" onClick={() => setSearchOpen(!state.ui.searchOpen)}>
+        <button
+          type="button"
+          className="search-icon-button"
+          onClick={() => {
+            if (state.ui.searchOpen) {
+              closeSearch();
+              return;
+            }
+            setSearchOpen(true);
+          }}
+          aria-expanded={state.ui.searchOpen}
+          aria-label={t('search')}
+        >
           <Search size={16} />
         </button>
         <input
+          ref={inputRef}
           className="search-input"
           value={state.ui.searchQuery}
           onChange={(event) => setSearchQuery(event.target.value)}
           onFocus={() => setSearchOpen(true)}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') {
+              event.preventDefault();
+              closeSearch();
+            }
+          }}
           placeholder={`${t('search')}...`}
           aria-label={t('search')}
+          tabIndex={state.ui.searchOpen ? 0 : -1}
         />
         {state.ui.searchOpen && state.ui.searchQuery ? (
-          <button className="search-clear-button" type="button" onClick={() => setSearchQuery('')}>
+          <button className="search-clear-button" type="button" onClick={closeSearch}>
             ×
           </button>
         ) : null}
       </div>
 
-      {state.ui.searchOpen ? (
+      {shouldShowDropdown ? (
         <div className="search-dropdown">
           {results.length ? (
             results.map((result) => {
@@ -93,10 +132,8 @@ export function SearchBar() {
                 </button>
               );
             })
-          ) : state.ui.searchQuery.length > 1 ? (
-            <div className="search-empty">{t('noResults')}</div>
           ) : (
-            <div className="search-empty">{t('typeToSearch')}</div>
+            <div className="search-empty">{t('noResults')}</div>
           )}
         </div>
       ) : null}

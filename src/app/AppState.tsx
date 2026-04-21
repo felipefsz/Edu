@@ -115,7 +115,11 @@ function hydrateState(): AppState {
       },
       ui: {
         ...seedState.ui,
-        ...parsed.ui,
+        activeThreadId: parsed.ui?.activeThreadId ?? seedState.ui.activeThreadId,
+        modal: null,
+        searchOpen: false,
+        searchQuery: '',
+        toasts: [],
       },
       session: {
         ...seedState.session,
@@ -173,7 +177,18 @@ export function AppProvider({ children }: PropsWithChildren) {
   const currentRole = currentUser?.role ?? null;
 
   useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const stateToPersist: AppState = {
+      ...state,
+      ui: {
+        ...seedState.ui,
+        activeThreadId: state.ui.activeThreadId,
+        modal: null,
+        searchOpen: false,
+        searchQuery: '',
+        toasts: [],
+      },
+    };
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToPersist));
   }, [state]);
 
   useEffect(() => {
@@ -316,7 +331,7 @@ export function AppProvider({ children }: PropsWithChildren) {
       ui: {
         ...currentState.ui,
         searchQuery: query,
-        searchOpen: true,
+        searchOpen: query.trim().length > 0 || currentState.ui.searchOpen,
       },
     }));
   };

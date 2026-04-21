@@ -95,7 +95,7 @@ export function AppLayout() {
         </nav>
 
         <div className="sidebar-card">
-          <div className="sidebar-card__eyebrow">Session</div>
+          <div className="sidebar-card__eyebrow">{state.preferences.language === 'en' ? 'Session' : 'Sessao'}</div>
           <button
             className="profile-chip"
             type="button"
@@ -106,7 +106,7 @@ export function AppLayout() {
             </span>
             <span>
               <strong>{currentUser?.name}</strong>
-              <small>{currentUser?.role === 'teacher' ? 'Teacher' : `Class ${currentUser?.classroom}`}</small>
+              <small>{currentUser?.role === 'teacher' ? t('teacherLabel') : `${t('classLabel')} ${currentUser?.classroom}`}</small>
             </span>
           </button>
           <button className="ghost-button ghost-button--full" type="button" onClick={logout}>
@@ -157,7 +157,7 @@ export function AppLayout() {
             </button>
             <button className="toolbar-button toolbar-button--text" type="button" onClick={toggleLanguage} title={t('language')}>
               <Globe2 size={16} />
-              <span>{state.preferences.language === 'pt' ? 'EN' : 'PT'}</span>
+              <span>{state.preferences.language === 'pt' ? 'PT' : 'EN'}</span>
             </button>
             <button
               className="toolbar-button"

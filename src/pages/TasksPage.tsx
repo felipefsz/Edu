@@ -14,7 +14,7 @@ export function TasksPage() {
   } = useApp();
   const [taskForm, setTaskForm] = useState({
     title: '',
-    subject: 'Math',
+    subject: 'Matematica',
     classroom: '',
     deadline: '',
     description: '',
@@ -48,42 +48,45 @@ export function TasksPage() {
   }, [currentRole, currentUser?.id, taskFilter.classroom, taskFilter.status, tasks]);
 
   const classrooms = [...new Set(state.users.map((user) => user.classroom).filter(Boolean))];
+  const isEnglish = state.preferences.language === 'en';
 
   return (
     <div className="stack-gap">
       <section className="hero-panel">
         <div>
-          <div className="panel-card__eyebrow">Task board</div>
+          <div className="panel-card__eyebrow">{isEnglish ? 'Task board' : 'Quadro de tarefas'}</div>
           <h1 className="hero-panel__title">
-            {currentRole === 'teacher' ? 'Create, review, and close the academic loop.' : 'See deadlines, send deliveries, and track reviews.'}
+            {currentRole === 'teacher'
+              ? isEnglish ? 'Create, review, and close the academic loop.' : 'Crie, revise e feche o ciclo academico.'
+              : isEnglish ? 'See deadlines, send deliveries, and track reviews.' : 'Veja prazos, envie entregas e acompanhe revisoes.'}
           </h1>
           <p className="hero-panel__copy">
             {currentRole === 'teacher'
-              ? 'Teacher flow includes creation, classroom targeting, submission visibility, and fast review.'
-              : 'Student flow keeps deadline, attachments, note, score, and teacher feedback in one place.'}
+              ? isEnglish ? 'Teacher flow includes creation, classroom targeting, submission visibility, and fast review.' : 'O fluxo do professor inclui criacao, turma alvo, entregas visiveis e revisao rapida.'
+              : isEnglish ? 'Student flow keeps deadline, attachments, note, score, and teacher feedback in one place.' : 'O fluxo do aluno junta prazo, anexos, observacao, nota e feedback do professor.'}
           </p>
         </div>
       </section>
 
       {currentRole === 'teacher' ? (
         <section className="panel-card">
-          <div className="panel-card__eyebrow">Create task</div>
+          <div className="panel-card__eyebrow">{isEnglish ? 'Create task' : 'Criar tarefa'}</div>
           <div className="form-grid">
             <input
               className="ui-input"
-              placeholder="Task title"
+              placeholder={isEnglish ? 'Task title' : 'Titulo da tarefa'}
               value={taskForm.title}
               onChange={(event) => setTaskForm((current) => ({ ...current, title: event.target.value }))}
             />
             <input
               className="ui-input"
-              placeholder="Subject"
+              placeholder={isEnglish ? 'Subject' : 'Materia'}
               value={taskForm.subject}
               onChange={(event) => setTaskForm((current) => ({ ...current, subject: event.target.value }))}
             />
             <input
               className="ui-input"
-              placeholder="Classroom"
+              placeholder={isEnglish ? 'Classroom' : 'Turma'}
               value={taskForm.classroom}
               onChange={(event) => setTaskForm((current) => ({ ...current, classroom: event.target.value }))}
             />
@@ -96,13 +99,13 @@ export function TasksPage() {
             <textarea
               className="ui-textarea"
               rows={4}
-              placeholder="Description and rubric"
+              placeholder={isEnglish ? 'Description and rubric' : 'Descricao e criterios'}
               value={taskForm.description}
               onChange={(event) => setTaskForm((current) => ({ ...current, description: event.target.value }))}
             />
             <input
               className="ui-input"
-              placeholder="Attachments, comma separated"
+              placeholder={isEnglish ? 'Attachments, comma separated' : 'Anexos, separados por virgula'}
               value={taskForm.attachments}
               onChange={(event) => setTaskForm((current) => ({ ...current, attachments: event.target.value }))}
             />
@@ -125,7 +128,7 @@ export function TasksPage() {
                 });
                 setTaskForm({
                   title: '',
-                  subject: 'Math',
+                  subject: 'Matematica',
                   classroom: '',
                   deadline: '',
                   description: '',
@@ -133,44 +136,44 @@ export function TasksPage() {
                 });
               }}
             >
-              Save task
+              {isEnglish ? 'Save task' : 'Salvar tarefa'}
             </button>
           </div>
         </section>
       ) : null}
 
       <section className="panel-card">
-        <div className="panel-card__eyebrow">Filters</div>
+        <div className="panel-card__eyebrow">{isEnglish ? 'Filters' : 'Filtros'}</div>
         <div className="toolbar-cluster">
           <select
             className="ui-input"
             value={taskFilter.classroom}
             onChange={(event) => setTaskFilter((current) => ({ ...current, classroom: event.target.value }))}
           >
-            <option value="all">All classrooms</option>
+            <option value="all">{isEnglish ? 'All classrooms' : 'Todas as turmas'}</option>
             {classrooms.map((classroom) => (
               <option key={classroom} value={classroom}>
-                Class {classroom}
+                {isEnglish ? 'Class' : 'Turma'} {classroom}
               </option>
             ))}
-            <option value="general">General</option>
+            <option value="general">{isEnglish ? 'General' : 'Geral'}</option>
           </select>
           <select
             className="ui-input"
             value={taskFilter.status}
             onChange={(event) => setTaskFilter((current) => ({ ...current, status: event.target.value }))}
           >
-            <option value="all">All statuses</option>
+            <option value="all">{isEnglish ? 'All statuses' : 'Todos os status'}</option>
             {currentRole === 'teacher' ? (
               <>
-                <option value="pending-review">Pending review</option>
-                <option value="reviewed">Reviewed</option>
+                <option value="pending-review">{isEnglish ? 'Pending review' : 'Revisao pendente'}</option>
+                <option value="reviewed">{isEnglish ? 'Reviewed' : 'Revisada'}</option>
               </>
             ) : (
               <>
-                <option value="pending">Pending</option>
-                <option value="submitted">Submitted</option>
-                <option value="reviewed">Reviewed</option>
+                <option value="pending">{isEnglish ? 'Pending' : 'Pendente'}</option>
+                <option value="submitted">{isEnglish ? 'Submitted' : 'Enviada'}</option>
+                <option value="reviewed">{isEnglish ? 'Reviewed' : 'Revisada'}</option>
               </>
             )}
           </select>
@@ -189,15 +192,17 @@ export function TasksPage() {
                   <p>{task.description}</p>
                 </div>
                 <div className="task-card__meta">
-                  <span className="status-pill">Deadline {task.deadline}</span>
-                  <small>Updated {formatRelativeDate(task.updatedAt)}</small>
-                  {task.classroom ? <small>Class {task.classroom}</small> : null}
+                  <span className="status-pill">{isEnglish ? 'Deadline' : 'Prazo'} {task.deadline}</span>
+                  <small>{isEnglish ? 'Updated' : 'Atualizada'} {formatRelativeDate(task.updatedAt)}</small>
+                  {task.classroom ? <small>{isEnglish ? 'Class' : 'Turma'} {task.classroom}</small> : null}
                   <button
                     className="ghost-button ghost-button--slim"
                     type="button"
                     onClick={() => openModal({ type: 'taskDetails', taskId: task.id, mode: currentRole === 'teacher' ? 'review' : 'submit' })}
                   >
-                    {currentRole === 'teacher' ? 'Open review' : 'Open delivery'}
+                    {currentRole === 'teacher'
+                      ? isEnglish ? 'Open review' : 'Abrir revisao'
+                      : isEnglish ? 'Open delivery' : 'Abrir entrega'}
                   </button>
                 </div>
               </div>
@@ -225,7 +230,7 @@ export function TasksPage() {
                         <div key={item.userId} className="submission-card submission-card--rich">
                           <strong>{state.users.find((user) => user.id === item.userId)?.name ?? item.userId}</strong>
                           <small>{item.status}</small>
-                          <p>{item.note || 'No note yet.'}</p>
+                          <p>{item.note || (isEnglish ? 'No note yet.' : 'Sem observacao ainda.')}</p>
                           {item.attachments.length ? (
                             <div className="tag-list">
                               {item.attachments.map((attachment) => (
@@ -238,7 +243,7 @@ export function TasksPage() {
                           <textarea
                             className="ui-textarea"
                             rows={3}
-                            placeholder="Feedback for the student"
+                            placeholder={isEnglish ? 'Feedback for the student' : 'Feedback para o aluno'}
                             value={draft.feedback}
                             onChange={(event) =>
                               setReviewDrafts((current) => ({
@@ -249,7 +254,7 @@ export function TasksPage() {
                           />
                           <input
                             className="ui-input"
-                            placeholder="Score"
+                            placeholder={isEnglish ? 'Score' : 'Nota'}
                             value={draft.score}
                             onChange={(event) =>
                               setReviewDrafts((current) => ({
@@ -259,7 +264,7 @@ export function TasksPage() {
                             }
                           />
                           <div className="button-row button-row--end">
-                            {item.score !== undefined ? <span className="status-pill">Score {item.score}</span> : null}
+                            {item.score !== undefined ? <span className="status-pill">{isEnglish ? 'Score' : 'Nota'} {item.score}</span> : null}
                             <button
                               className="solid-button"
                               type="button"
@@ -272,26 +277,26 @@ export function TasksPage() {
                                 )
                               }
                             >
-                              Save review
+                              {isEnglish ? 'Save review' : 'Salvar revisao'}
                             </button>
                           </div>
                         </div>
                       );
                     })
                   ) : (
-                    <div className="empty-panel">No submissions yet.</div>
+                    <div className="empty-panel">{isEnglish ? 'No submissions yet.' : 'Nenhuma entrega ainda.'}</div>
                   )}
                 </div>
               ) : (
                 <div className="submission-editor">
                   <div className="task-student-meta">
                     <span className="status-pill">{submission?.status ?? 'pending'}</span>
-                    {submission?.score !== undefined ? <span className="status-pill">Score {submission.score}</span> : null}
+                    {submission?.score !== undefined ? <span className="status-pill">{isEnglish ? 'Score' : 'Nota'} {submission.score}</span> : null}
                   </div>
                   <textarea
                     className="ui-textarea"
                     rows={3}
-                    placeholder="Write your delivery note"
+                    placeholder={isEnglish ? 'Write your delivery note' : 'Escreva sua observacao de entrega'}
                     value={submissionNotes[task.id] ?? submission?.note ?? ''}
                     onChange={(event) =>
                       setSubmissionNotes((current) => ({ ...current, [task.id]: event.target.value }))
@@ -299,7 +304,7 @@ export function TasksPage() {
                   />
                   <input
                     className="ui-input"
-                    placeholder="Attachments or links, comma separated"
+                    placeholder={isEnglish ? 'Attachments or links, comma separated' : 'Anexos ou links, separados por virgula'}
                     value={submissionAttachments[task.id] ?? submission?.attachments.join(', ') ?? ''}
                     onChange={(event) =>
                       setSubmissionAttachments((current) => ({ ...current, [task.id]: event.target.value }))
@@ -307,7 +312,7 @@ export function TasksPage() {
                   />
                   {submission?.feedback ? (
                     <div className="list-card">
-                      <strong>Teacher feedback</strong>
+                      <strong>{isEnglish ? 'Teacher feedback' : 'Feedback do professor'}</strong>
                       <small>{submission.feedback}</small>
                     </div>
                   ) : null}
@@ -326,7 +331,7 @@ export function TasksPage() {
                         )
                       }
                     >
-                      Send delivery
+                      {isEnglish ? 'Send delivery' : 'Enviar entrega'}
                     </button>
                   </div>
                 </div>
