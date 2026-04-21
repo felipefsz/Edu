@@ -504,5 +504,6 @@ export const seedState: AppState = {
     activeThreadId: 'group-a',
     searchOpen: false,
     searchQuery: '',
+    toasts: [],
   },
 };

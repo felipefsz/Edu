@@ -22,6 +22,7 @@ import type {
   PageKey,
   Preferences,
   Role,
+  ToastType,
 } from './types';
 import type { TranslationKey } from './translations';
 
@@ -63,6 +64,7 @@ interface AppContextValue {
   updateNotificationChannel: (channel: keyof Preferences['notificationChannels'], value: boolean) => void;
   setSearchOpen: (open: boolean) => void;
   setSearchQuery: (query: string) => void;
+  dismissToast: (toastId: string) => void;
   openModal: (modal: ModalState) => void;
   closeModal: () => void;
   selectThread: (threadId: string) => void;
@@ -148,6 +150,21 @@ function createNotification(
   };
 }
 
+function createToast(message: string, type: ToastType = 'success') {
+  return {
+    id: makeId('toast'),
+    type,
+    message,
+  };
+}
+
+function withToast(ui: AppState['ui'], message: string, type: ToastType = 'success'): AppState['ui'] {
+  return {
+    ...ui,
+    toasts: [createToast(message, type), ...(ui.toasts ?? [])].slice(0, 4),
+  };
+}
+
 export function AppProvider({ children }: PropsWithChildren) {
   const [state, setState] = useState<AppState>(() => hydrateState());
   const currentUser = getCurrentUser(state);
@@ -172,12 +189,24 @@ export function AppProvider({ children }: PropsWithChildren) {
 
       setState((currentState) => {
         if (currentState.ui.modal || currentState.ui.searchOpen) {
+          event.preventDefault();
           return {
             ...currentState,
             ui: {
               ...currentState.ui,
               modal: null,
               searchOpen: false,
+              searchQuery: '',
+            },
+          };
+        }
+        if (currentState.ui.toasts.length) {
+          event.preventDefault();
+          return {
+            ...currentState,
+            ui: {
+              ...currentState.ui,
+              toasts: currentState.ui.toasts.slice(1),
             },
           };
         }
@@ -290,6 +319,16 @@ export function AppProvider({ children }: PropsWithChildren) {
     }));
   };
 
+  const dismissToast = (toastId: string) => {
+    setState((currentState) => ({
+      ...currentState,
+      ui: {
+        ...currentState.ui,
+        toasts: currentState.ui.toasts.filter((toast) => toast.id !== toastId),
+      },
+    }));
+  };
+
   const openModal = (modal: ModalState) => {
     setState((currentState) => ({
       ...currentState,
@@ -361,6 +400,10 @@ export function AppProvider({ children }: PropsWithChildren) {
         ),
         ...currentState.notifications,
       ],
+      ui: withToast(
+        currentState.ui,
+        state.preferences.language === 'en' ? 'Post published.' : 'Publicacao publicada.',
+      ),
     }));
   };
 
@@ -405,7 +448,10 @@ export function AppProvider({ children }: PropsWithChildren) {
         ...currentState.notifications,
       ],
       ui: {
-        ...currentState.ui,
+        ...withToast(
+          currentState.ui,
+          state.preferences.language === 'en' ? 'Repost with comment published.' : 'Repost com comentario publicado.',
+        ),
         modal: null,
       },
     }));
@@ -453,6 +499,11 @@ export function AppProvider({ children }: PropsWithChildren) {
         ),
         ...currentState.notifications,
       ],
+      ui: withToast(
+        currentState.ui,
+        state.preferences.language === 'en' ? 'Post reposted.' : 'Publicacao repostada.',
+        'info',
+      ),
     }));
   };
 
@@ -567,6 +618,11 @@ export function AppProvider({ children }: PropsWithChildren) {
         createNotification(notificationMessage, 'message', 'messages', threadId),
         ...currentState.notifications,
       ],
+      ui: withToast(
+        currentState.ui,
+        state.preferences.language === 'en' ? 'Message sent.' : 'Mensagem enviada.',
+        'info',
+      ),
     }));
   };
 
@@ -588,7 +644,10 @@ export function AppProvider({ children }: PropsWithChildren) {
             },
       ),
       ui: {
-        ...currentState.ui,
+        ...withToast(
+          currentState.ui,
+          state.preferences.language === 'en' ? 'Group updated.' : 'Grupo atualizado.',
+        ),
         modal: null,
       },
     }));
@@ -624,6 +683,10 @@ export function AppProvider({ children }: PropsWithChildren) {
         ),
         ...currentState.notifications,
       ],
+      ui: withToast(
+        currentState.ui,
+        state.preferences.language === 'en' ? 'Task created.' : 'Tarefa criada.',
+      ),
     }));
   };
 
@@ -662,6 +725,10 @@ export function AppProvider({ children }: PropsWithChildren) {
         ),
         ...currentState.notifications,
       ],
+      ui: withToast(
+        currentState.ui,
+        state.preferences.language === 'en' ? 'Review saved.' : 'Revisao salva.',
+      ),
     }));
   };
 
@@ -691,6 +758,10 @@ export function AppProvider({ children }: PropsWithChildren) {
         ),
         ...currentState.notifications,
       ],
+      ui: withToast(
+        currentState.ui,
+        state.preferences.language === 'en' ? 'Notice published.' : 'Aviso publicado.',
+      ),
     }));
   };
 
@@ -723,6 +794,10 @@ export function AppProvider({ children }: PropsWithChildren) {
         ),
         ...currentState.notifications,
       ],
+      ui: withToast(
+        currentState.ui,
+        state.preferences.language === 'en' ? 'Forum topic created.' : 'Topico criado no forum.',
+      ),
     }));
   };
 
@@ -758,6 +833,11 @@ export function AppProvider({ children }: PropsWithChildren) {
         ),
         ...currentState.notifications,
       ],
+      ui: withToast(
+        currentState.ui,
+        state.preferences.language === 'en' ? 'Reply sent.' : 'Resposta enviada.',
+        'info',
+      ),
     }));
   };
 
@@ -768,6 +848,11 @@ export function AppProvider({ children }: PropsWithChildren) {
       ...currentState,
       forumTopics: currentState.forumTopics.map((topic) =>
         topic.id === topicId ? { ...topic, resolved: !topic.resolved } : topic,
+      ),
+      ui: withToast(
+        currentState.ui,
+        state.preferences.language === 'en' ? 'Forum topic updated.' : 'Topico atualizado.',
+        'info',
       ),
     }));
   };
@@ -809,6 +894,10 @@ export function AppProvider({ children }: PropsWithChildren) {
         ),
         ...currentState.notifications,
       ],
+      ui: withToast(
+        currentState.ui,
+        state.preferences.language === 'en' ? 'Quiz submitted.' : 'Quiz enviado.',
+      ),
     }));
   };
 
@@ -862,6 +951,10 @@ export function AppProvider({ children }: PropsWithChildren) {
         ),
         ...currentState.notifications,
       ],
+      ui: withToast(
+        currentState.ui,
+        state.preferences.language === 'en' ? 'Mission completed.' : 'Missao concluida.',
+      ),
     }));
   };
 
@@ -902,6 +995,10 @@ export function AppProvider({ children }: PropsWithChildren) {
         ),
         ...currentState.notifications,
       ],
+      ui: withToast(
+        currentState.ui,
+        state.preferences.language === 'en' ? 'Task delivery sent.' : 'Entrega enviada.',
+      ),
     }));
   };
 
@@ -922,6 +1019,7 @@ export function AppProvider({ children }: PropsWithChildren) {
     updateNotificationChannel,
     setSearchOpen,
     setSearchQuery,
+    dismissToast,
     openModal,
     closeModal,
     selectThread,

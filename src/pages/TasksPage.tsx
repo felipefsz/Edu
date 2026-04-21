@@ -7,6 +7,7 @@ export function TasksPage() {
     createTask,
     currentRole,
     currentUser,
+    openModal,
     reviewTaskSubmission,
     state,
     submitTask,
@@ -191,6 +192,13 @@ export function TasksPage() {
                   <span className="status-pill">Deadline {task.deadline}</span>
                   <small>Updated {formatRelativeDate(task.updatedAt)}</small>
                   {task.classroom ? <small>Class {task.classroom}</small> : null}
+                  <button
+                    className="ghost-button ghost-button--slim"
+                    type="button"
+                    onClick={() => openModal({ type: 'taskDetails', taskId: task.id, mode: currentRole === 'teacher' ? 'review' : 'submit' })}
+                  >
+                    {currentRole === 'teacher' ? 'Open review' : 'Open delivery'}
+                  </button>
                 </div>
               </div>
 

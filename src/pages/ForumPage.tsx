@@ -7,6 +7,7 @@ export function ForumPage() {
     createForumTopic,
     currentRole,
     currentUser,
+    openModal,
     replyForumTopic,
     state,
     toggleForumResolved,
@@ -106,6 +107,9 @@ export function ForumPage() {
                   <span className={topic.resolved ? 'status-pill' : 'status-pill status-pill--accent'}>
                     {topic.resolved ? (isEnglish ? 'Resolved' : 'Resolvido') : (isEnglish ? 'Open' : 'Aberto')}
                   </span>
+                  <button className="ghost-button ghost-button--slim" type="button" onClick={() => openModal({ type: 'forumTopic', topicId: topic.id })}>
+                    {isEnglish ? 'Open' : 'Abrir'}
+                  </button>
                   {currentRole === 'teacher' ? (
                     <button className="ghost-button ghost-button--slim" type="button" onClick={() => toggleForumResolved(topic.id)}>
                       {topic.resolved ? (isEnglish ? 'Reopen' : 'Reabrir') : (isEnglish ? 'Resolve' : 'Resolver')}

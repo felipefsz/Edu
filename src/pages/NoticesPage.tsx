@@ -3,7 +3,7 @@ import { useApp } from '../app/AppState';
 import { getRelevantNotices } from '../utils/selectors';
 
 export function NoticesPage() {
-  const { createNotice, currentRole, currentUser, state } = useApp();
+  const { createNotice, currentRole, currentUser, openModal, state } = useApp();
   const isEnglish = state.preferences.language === 'en';
   const notices = getRelevantNotices(state, currentUser);
   const [noticeForm, setNoticeForm] = useState({
@@ -94,6 +94,9 @@ export function NoticesPage() {
               {notice.classroom ? <span className="tag-pill">Turma {notice.classroom}</span> : null}
               {notice.pinned ? <span className="status-pill">{isEnglish ? 'Pinned' : 'Fixado'}</span> : null}
             </div>
+            <button className="ghost-button ghost-button--slim" type="button" onClick={() => openModal({ type: 'noticeDetails', noticeId: notice.id })}>
+              {isEnglish ? 'Open notice' : 'Abrir aviso'}
+            </button>
           </article>
         ))}
       </section>

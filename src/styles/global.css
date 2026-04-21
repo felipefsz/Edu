@@ -51,6 +51,45 @@
   }
 }
 
+.tap {
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--motion-fast),
+    opacity var(--motion-fast),
+    background var(--motion-fast),
+    border-color var(--motion-fast),
+    color var(--motion-fast),
+    box-shadow var(--motion-fast);
+}
+
+.tap:active {
+  transform: scale(0.985);
+}
+
+.card-rise {
+  transition:
+    transform var(--motion-fast),
+    box-shadow var(--motion-fast),
+    border-color var(--motion-fast);
+}
+
+.card-rise:hover {
+  transform: translateY(-2px);
+  border-color: rgba(99, 116, 246, 0.42);
+}
+
+.pulse-soft,
+.msgIn,
+.fade-up {
+  animation: slide-up var(--motion-fast);
+}
+
+.modal-spring,
+.sc-in,
+.scale-in {
+  animation: scale-in var(--motion-fast);
+}
+
 html[data-theme='light'] {
   --bg: #eef2ff;
   --surface-1: #ffffff;
@@ -750,6 +789,13 @@ html[data-transparency='solid'] .floating-top-button {
     var(--surface-2);
 }
 
+.list-card--button {
+  width: 100%;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
 .comment-row {
   border-radius: var(--radius-md);
   background: var(--surface-2);
@@ -988,6 +1034,16 @@ html[data-transparency='solid'] .floating-top-button {
   justify-content: space-between;
   gap: 1rem;
   align-items: baseline;
+}
+
+.calendar-day-card__date--button {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
 .calendar-day-card__date strong {
@@ -1283,6 +1339,40 @@ html[data-transparency='solid'] .floating-top-button {
   backdrop-filter: blur(12px);
 }
 
+.modal-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+}
+
+.modal-rich-text {
+  margin: 0;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-2);
+  line-height: 1.7;
+}
+
+.forum-topic-hero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(135deg, rgba(99, 116, 246, 0.12), transparent 60%),
+    var(--surface-2);
+}
+
+.forum-topic-hero p {
+  margin: 0.4rem 0 0.8rem;
+  color: var(--text-2);
+  line-height: 1.65;
+}
+
 .profile-hero,
 .profile-page-hero__content {
   display: flex;
@@ -1364,6 +1454,65 @@ html[data-transparency='solid'] .floating-top-button {
   color: var(--accent);
   backdrop-filter: blur(18px);
   box-shadow: var(--shadow);
+}
+
+.toast-stack {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 100;
+  display: grid;
+  gap: 0.65rem;
+  width: min(360px, calc(100vw - 2rem));
+  pointer-events: none;
+}
+
+.toast-card {
+  pointer-events: auto;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent),
+    var(--surface-1);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+  animation: toast-in var(--motion-fast);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.toast-card--success { color: var(--green); border-color: rgba(31, 212, 122, 0.28); }
+.toast-card--info { color: var(--accent); border-color: rgba(99, 116, 246, 0.28); }
+.toast-card--warning { color: var(--yellow); border-color: rgba(245, 165, 28, 0.32); }
+.toast-card--error { color: var(--red); border-color: rgba(240, 80, 104, 0.32); }
+
+.toast-card span {
+  color: var(--text-1);
+  font-size: 0.88rem;
+}
+
+.toast-close {
+  border: 0;
+  background: transparent;
+  color: var(--text-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem;
 }
 
 html[data-feedDensity='compact'] .post-card,

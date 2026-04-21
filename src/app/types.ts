@@ -15,6 +15,7 @@ export type PageKey =
   | 'analytics'
   | 'settings';
 export type NotificationType = 'social' | 'academic' | 'message' | 'system';
+export type ToastType = 'success' | 'info' | 'warning' | 'error';
 export type PostKind = 'regular' | 'repost' | 'quote';
 export type TaskSubmissionStatus = 'pending' | 'submitted' | 'reviewed';
 
@@ -185,6 +186,12 @@ export interface AppNotification {
   readByUserIds: string[];
 }
 
+export interface SystemToast {
+  id: string;
+  type: ToastType;
+  message: string;
+}
+
 export interface Mission {
   id: string;
   role: Role;
@@ -210,6 +217,10 @@ export interface Preferences {
 export type ModalState =
   | { type: 'notifications' }
   | { type: 'postDetails'; postId: string }
+  | { type: 'taskDetails'; taskId: string; mode?: 'view' | 'submit' | 'review' }
+  | { type: 'noticeDetails'; noticeId: string }
+  | { type: 'calendarDay'; date: string }
+  | { type: 'forumTopic'; topicId: string }
   | { type: 'quoteComposer'; sourcePostId: string }
   | { type: 'groupEditor'; groupId: string }
   | { type: 'profilePreview'; userId: string };
@@ -219,6 +230,7 @@ export interface UIState {
   activeThreadId: string | null;
   searchOpen: boolean;
   searchQuery: string;
+  toasts: SystemToast[];
 }
 
 export interface SessionState {

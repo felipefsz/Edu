@@ -3,7 +3,7 @@ import { useApp } from '../app/AppState';
 import { getCalendarItems } from '../utils/selectors';
 
 export function CalendarPage() {
-  const { currentUser, state } = useApp();
+  const { currentUser, openModal, state } = useApp();
   const isEnglish = state.preferences.language === 'en';
   const [filter, setFilter] = useState<'all' | 'task' | 'notice'>('all');
   const items = getCalendarItems(state, currentUser);
@@ -49,20 +49,29 @@ export function CalendarPage() {
       <section className="calendar-grid">
         {Object.entries(groupedDays).map(([date, dayItems]) => (
           <article key={date} className="panel-card calendar-day-card">
-            <div className="calendar-day-card__date">
+            <button className="calendar-day-card__date calendar-day-card__date--button" type="button" onClick={() => openModal({ type: 'calendarDay', date })}>
               <strong>{new Date(`${date}T12:00:00`).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</strong>
               <small>{date}</small>
-            </div>
+            </button>
             <div className="stack-gap-sm">
               {dayItems.map((item) => (
-                <div key={item.id} className="list-card">
+                <button
+                  key={item.id}
+                  className="list-card list-card--button"
+                  type="button"
+                  onClick={() =>
+                    item.type === 'task'
+                      ? openModal({ type: 'taskDetails', taskId: item.id.replace('task-', '') })
+                      : openModal({ type: 'noticeDetails', noticeId: item.id.replace('notice-', '') })
+                  }
+                >
                   <span className={item.type === 'task' ? 'status-pill' : 'tag-pill'}>
                     {item.type === 'task' ? (isEnglish ? 'Task' : 'Tarefa') : (isEnglish ? 'Notice' : 'Aviso')}
                   </span>
                   <strong>{item.title}</strong>
                   <small>{item.description}</small>
                   {item.classroom ? <small>Turma {item.classroom}</small> : null}
-                </div>
+                </button>
               ))}
             </div>
           </article>

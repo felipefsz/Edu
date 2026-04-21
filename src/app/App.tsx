@@ -1,6 +1,7 @@
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from '../components/AppLayout';
 import { ModalLayer } from '../components/ModalLayer';
+import { ToastLayer } from '../components/ToastLayer';
 import { useApp } from './AppState';
 import { AnalyticsPage } from '../pages/AnalyticsPage';
 import { CalendarPage } from '../pages/CalendarPage';
@@ -44,6 +45,7 @@ export function App() {
             </Route>
           </Routes>
           <ModalLayer />
+          <ToastLayer />
         </>
       ) : (
         <LandingPage />
