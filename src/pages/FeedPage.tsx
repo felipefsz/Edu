@@ -20,6 +20,7 @@ export function FeedPage() {
     createPost,
     currentRole,
     currentUser,
+    completeMission,
     openModal,
     state,
     toggleFollow,
@@ -27,6 +28,10 @@ export function FeedPage() {
   } = useApp();
   const [postBody, setPostBody] = useState('');
   const [pinPost, setPinPost] = useState(false);
+  const [sortMode, setSortMode] = useState<'latest' | 'trending'>('latest');
+  const [feedFilter, setFeedFilter] = useState<'all' | 'following' | 'class' | 'saved'>('all');
+  const [hashtagFilter, setHashtagFilter] = useState('');
+  const [visibleCount, setVisibleCount] = useState(6);
   const [noticeForm, setNoticeForm] = useState({
     title: '',
     body: '',
@@ -34,6 +39,21 @@ export function FeedPage() {
     pinned: false,
   });
   const posts = getFeedPosts(state);
+  const visiblePosts = posts
+    .filter((post) => {
+      if (hashtagFilter && !post.tags.some((tag) => tag.toLowerCase() === hashtagFilter.toLowerCase())) return false;
+      if (!currentUser) return true;
+      if (feedFilter === 'following') return currentUser.followingIds.includes(post.authorId);
+      if (feedFilter === 'class') return Boolean(currentUser.classroom && post.classroom === currentUser.classroom);
+      if (feedFilter === 'saved') return post.savedByUserIds.includes(currentUser.id);
+      return true;
+    })
+    .sort((left, right) => {
+      if (sortMode === 'latest') return 0;
+      const leftScore = left.likeUserIds.length + left.comments.length + left.repostUserIds.length + left.savedByUserIds.length;
+      const rightScore = right.likeUserIds.length + right.comments.length + right.repostUserIds.length + right.savedByUserIds.length;
+      return rightScore - leftScore;
+    });
   const trendingTags = getTrendingTags(state);
   const missions = getOpenMissions(state, currentUser);
   const studentOverview = getStudentOverview(state, currentUser);
@@ -77,7 +97,7 @@ export function FeedPage() {
           <div className="metric-grid">
             {currentRole === 'teacher' ? (
               <>
-                <MetricTile label={isEnglish ? 'Posts in motion' : 'Posts em movimento'} value={posts.length} accent="blue" />
+                <MetricTile label={isEnglish ? 'Posts in motion' : 'Posts em movimento'} value={visiblePosts.length} accent="blue" />
                 <MetricTile label={isEnglish ? 'Unread inbox' : 'Caixa nao lida'} value={state.notifications.length} accent="yellow" />
                 <MetricTile label={isEnglish ? 'Active tasks' : 'Tarefas ativas'} value={state.tasks.length} accent="green" />
                 <MetricTile label={isEnglish ? 'Live groups' : 'Grupos ativos'} value={state.chatGroups.length} accent="pink" />
@@ -195,10 +215,52 @@ export function FeedPage() {
           </section>
         ) : null}
 
+        <section className="panel-card">
+          <div className="feed-filter-row">
+            <button className={sortMode === 'latest' ? 'status-pill' : 'ghost-button ghost-button--slim'} type="button" onClick={() => setSortMode('latest')}>
+              {isEnglish ? 'Latest' : 'Mais recentes'}
+            </button>
+            <button className={sortMode === 'trending' ? 'status-pill' : 'ghost-button ghost-button--slim'} type="button" onClick={() => setSortMode('trending')}>
+              {isEnglish ? 'Trending' : 'Em alta'}
+            </button>
+            <button className={feedFilter === 'all' ? 'status-pill' : 'ghost-button ghost-button--slim'} type="button" onClick={() => setFeedFilter('all')}>
+              {isEnglish ? 'All' : 'Tudo'}
+            </button>
+            {currentRole === 'student' ? (
+              <>
+                <button className={feedFilter === 'following' ? 'status-pill' : 'ghost-button ghost-button--slim'} type="button" onClick={() => setFeedFilter('following')}>
+                  {isEnglish ? 'Following' : 'Seguindo'}
+                </button>
+                <button className={feedFilter === 'class' ? 'status-pill' : 'ghost-button ghost-button--slim'} type="button" onClick={() => setFeedFilter('class')}>
+                  {isEnglish ? 'My class' : 'Minha turma'}
+                </button>
+                <button className={feedFilter === 'saved' ? 'status-pill' : 'ghost-button ghost-button--slim'} type="button" onClick={() => setFeedFilter('saved')}>
+                  {isEnglish ? 'Saved' : 'Salvos'}
+                </button>
+              </>
+            ) : null}
+            {hashtagFilter ? (
+              <button className="tag-pill tag-pill--button" type="button" onClick={() => setHashtagFilter('')}>
+                #{hashtagFilter} x
+              </button>
+            ) : null}
+          </div>
+        </section>
+
         <section className="stack-gap">
-          {posts.map((post) => (
+          {visiblePosts.slice(0, visibleCount).map((post) => (
             <PostCard key={post.id} post={post} />
           ))}
+          {visiblePosts.length > visibleCount ? (
+            <button className="ghost-button" type="button" onClick={() => setVisibleCount((count) => count + 6)}>
+              {isEnglish ? 'Load more posts' : 'Carregar mais publicacoes'}
+            </button>
+          ) : null}
+          {!visiblePosts.length ? (
+            <div className="empty-panel">
+              {isEnglish ? 'No posts match this filter yet.' : 'Nenhuma publicacao combina com este filtro ainda.'}
+            </div>
+          ) : null}
         </section>
       </section>
 
@@ -212,7 +274,7 @@ export function FeedPage() {
           {currentRole === 'teacher' ? (
             <div className="stack-gap-sm">
               {trendingTags.slice(0, 4).map((trend) => (
-                <button key={trend.tag} type="button" className="list-card">
+                <button key={trend.tag} type="button" className="list-card list-card--button" onClick={() => setHashtagFilter(trend.tag)}>
                   <strong>#{trend.tag}</strong>
                   <small>{isEnglish ? `${trend.count} posts in the stream` : `${trend.count} posts em circulacao`}</small>
                 </button>
@@ -222,10 +284,10 @@ export function FeedPage() {
             <div className="stack-gap-sm">
               {missions.length ? (
                 missions.slice(0, 3).map((mission) => (
-                  <div key={mission.id} className="list-card">
+                  <button key={mission.id} className="list-card list-card--button" type="button" onClick={() => completeMission(mission.id)}>
                     <strong>{mission.label}</strong>
                     <small>{mission.xp} XP</small>
-                  </div>
+                  </button>
                 ))
               ) : (
                 <div className="muted-copy">{isEnglish ? 'All missions for this cycle are already done.' : 'Todas as missoes deste ciclo ja foram concluidas.'}</div>
@@ -238,14 +300,14 @@ export function FeedPage() {
           <div className="panel-card__eyebrow">{isEnglish ? 'Notice board' : 'Quadro de avisos'}</div>
           <div className="stack-gap-sm">
             {noticeHighlights.map((notice) => (
-              <div key={notice.id} className="list-card list-card--notice">
+              <button key={notice.id} className="list-card list-card--notice list-card--button" type="button" onClick={() => openModal({ type: 'noticeDetails', noticeId: notice.id })}>
                 <strong>{notice.title}</strong>
                 <small>{notice.body}</small>
                 <div className="tag-list">
                   {notice.classroom ? <span className="tag-pill">{t('classLabel')} {notice.classroom}</span> : null}
                   {notice.pinned ? <span className="status-pill">{t('pinned')}</span> : null}
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </section>
@@ -259,16 +321,16 @@ export function FeedPage() {
           <div className="stack-gap-sm">
             {currentRole === 'teacher'
               ? allNoticeHighlights.map((notice) => (
-                  <div key={notice.id} className="list-card">
+                  <button key={notice.id} className="list-card list-card--button" type="button" onClick={() => openModal({ type: 'noticeDetails', noticeId: notice.id })}>
                     <strong>{notice.title}</strong>
                     <small>{notice.body}</small>
-                  </div>
+                  </button>
                 ))
               : upcomingTasks.map((task) => (
-                  <div key={task.id} className="list-card">
+                  <button key={task.id} className="list-card list-card--button" type="button" onClick={() => openModal({ type: 'taskDetails', taskId: task.id, mode: 'submit' })}>
                     <strong>{task.title}</strong>
                     <small>{task.subject} / {task.deadline}</small>
-                  </div>
+                  </button>
                 ))}
           </div>
         </section>
@@ -303,7 +365,7 @@ export function FeedPage() {
           <div className="panel-card__eyebrow">{isEnglish ? 'Top students' : 'Top alunos'}</div>
           <div className="stack-gap-sm">
             {topStudents.map((user, index) => (
-              <div key={user.id} className="person-row person-row--static">
+              <button key={user.id} className="person-row" type="button" onClick={() => openModal({ type: 'profilePreview', userId: user.id })}>
                 <span className="rank-pill">{index + 1}</span>
                 <span className="avatar-pill" style={{ background: user.avatarTone }}>
                   {user.name.slice(0, 1)}
@@ -312,7 +374,7 @@ export function FeedPage() {
                   <strong>{user.name}</strong>
                   <small>{user.classroom ? `${t('classLabel')} ${user.classroom}` : isEnglish ? 'Student' : 'Aluno'}</small>
                 </span>
-              </div>
+              </button>
             ))}
           </div>
         </section>

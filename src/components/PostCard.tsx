@@ -4,8 +4,10 @@ import {
   Languages,
   Maximize2,
   MessageCircle,
+  Pin,
   Quote,
   Repeat2,
+  Trash2,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useApp } from '../app/AppState';
@@ -22,11 +24,13 @@ export function PostCard({ post, compact = false, forceComments = false }: PostC
   const {
     addComment,
     currentUser,
+    deletePost,
     openModal,
     repostPost,
     state,
     t,
     toggleLikePost,
+    togglePinPost,
     toggleSavePost,
   } = useApp();
   const [commentBody, setCommentBody] = useState('');
@@ -37,6 +41,7 @@ export function PostCard({ post, compact = false, forceComments = false }: PostC
   const sourceAuthor = getUserById(state, sourcePost?.authorId);
   const liked = currentUser ? post.likeUserIds.includes(currentUser.id) : false;
   const saved = currentUser ? post.savedByUserIds.includes(currentUser.id) : false;
+  const canManagePost = Boolean(currentUser && (currentUser.role === 'teacher' || currentUser.id === post.authorId));
   const targetLanguage: Language = state.preferences.language === 'pt' ? 'en' : 'pt';
   const translatedBody = post.bodyTranslations?.[targetLanguage];
   const displayBody = showTranslation && translatedBody ? translatedBody : post.body;
@@ -67,6 +72,16 @@ export function PostCard({ post, compact = false, forceComments = false }: PostC
         </button>
         <div className="toolbar-cluster">
           {post.pinned ? <span className="status-pill status-pill--accent">{t('pinned')}</span> : null}
+          {currentUser?.role === 'teacher' ? (
+            <button className="toolbar-button toolbar-button--icon" type="button" onClick={() => togglePinPost(post.id)} title={post.pinned ? 'Desfixar' : 'Fixar'}>
+              <Pin size={15} />
+            </button>
+          ) : null}
+          {canManagePost ? (
+            <button className="toolbar-button toolbar-button--icon toolbar-button--danger" type="button" onClick={() => deletePost(post.id)} title="Remover">
+              <Trash2 size={15} />
+            </button>
+          ) : null}
           {!compact && !forceComments ? (
             <button
               className="toolbar-button toolbar-button--icon"
@@ -82,7 +97,7 @@ export function PostCard({ post, compact = false, forceComments = false }: PostC
 
       <div className="post-card__body feed-card-body">
         {post.kind !== 'regular' && sourcePost ? (
-          <div className="quoted-post">
+          <button className="quoted-post quoted-post--button" type="button" onClick={() => openModal({ type: 'postDetails', postId: sourcePost.id })}>
             <div className="quoted-post__eyebrow">
               {post.kind === 'quote'
                 ? state.preferences.language === 'en' ? 'Quoted post' : 'Publicacao comentada'
@@ -90,10 +105,14 @@ export function PostCard({ post, compact = false, forceComments = false }: PostC
             </div>
             <div className="quoted-post__author">{sourceAuthor?.name ?? 'Autor original'}</div>
             <p>{sourcePost.body}</p>
-          </div>
+          </button>
         ) : null}
 
-        {displayBody ? <p className="post-card__text">{displayBody}</p> : null}
+        {displayBody ? (
+          <button className="post-open-body" type="button" onClick={() => openModal({ type: 'postDetails', postId: post.id })}>
+            <span className="post-card__text">{displayBody}</span>
+          </button>
+        ) : null}
 
         {translatedBody ? (
           <div className="feed-translate-row">
@@ -112,9 +131,9 @@ export function PostCard({ post, compact = false, forceComments = false }: PostC
         {post.tags.length ? (
           <div className="tag-list">
             {post.tags.map((tag) => (
-              <span key={tag} className="tag-pill">
+              <button key={tag} className="tag-pill tag-pill--button" type="button" onClick={() => openModal({ type: 'postDetails', postId: post.id })}>
                 #{tag}
-              </span>
+              </button>
             ))}
           </div>
         ) : null}

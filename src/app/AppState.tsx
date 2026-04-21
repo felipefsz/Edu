@@ -74,6 +74,8 @@ interface AppContextValue {
   repostPost: (sourcePostId: string) => void;
   toggleLikePost: (postId: string) => void;
   toggleSavePost: (postId: string) => void;
+  togglePinPost: (postId: string) => void;
+  deletePost: (postId: string) => void;
   addComment: (postId: string, body: string) => void;
   sendMessage: (threadId: string, body: string) => void;
   updateGroup: (groupId: string, patch: Partial<ChatGroup>) => void;
@@ -541,6 +543,48 @@ export function AppProvider({ children }: PropsWithChildren) {
         };
       }),
     }));
+  };
+
+  const togglePinPost = (postId: string) => {
+    if (!currentUser || currentUser.role !== 'teacher') return;
+
+    setState((currentState) => ({
+      ...currentState,
+      posts: currentState.posts.map((post) =>
+        post.id === postId ? { ...post, pinned: !post.pinned } : post,
+      ),
+      ui: withToast(
+        currentState.ui,
+        state.preferences.language === 'en' ? 'Post pin updated.' : 'Fixacao do post atualizada.',
+        'info',
+      ),
+    }));
+  };
+
+  const deletePost = (postId: string) => {
+    if (!currentUser) return;
+
+    setState((currentState) => {
+      const targetPost = currentState.posts.find((post) => post.id === postId);
+      if (!targetPost || (currentUser.role !== 'teacher' && targetPost.authorId !== currentUser.id)) {
+        return currentState;
+      }
+
+      return {
+        ...currentState,
+        posts: currentState.posts.filter((post) => post.id !== postId && post.sourcePostId !== postId),
+        ui: {
+          ...withToast(
+            currentState.ui,
+            state.preferences.language === 'en' ? 'Post removed.' : 'Publicacao removida.',
+            'warning',
+          ),
+          modal: currentState.ui.modal?.type === 'postDetails' && currentState.ui.modal.postId === postId
+            ? null
+            : currentState.ui.modal,
+        },
+      };
+    });
   };
 
   const addComment = (postId: string, body: string) => {
@@ -1029,6 +1073,8 @@ export function AppProvider({ children }: PropsWithChildren) {
     repostPost,
     toggleLikePost,
     toggleSavePost,
+    togglePinPost,
+    deletePost,
     addComment,
     sendMessage,
     updateGroup,

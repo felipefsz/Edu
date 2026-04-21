@@ -2,6 +2,7 @@ import { Search, UserRound, Users, MessageSquareText, FileText, BellRing, Notebo
 import { useDeferredValue } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../app/AppState';
+import type { SearchResult } from '../app/types';
 import { buildSearchResults } from '../utils/selectors';
 
 const iconMap = {
@@ -15,17 +16,31 @@ const iconMap = {
 };
 
 export function SearchBar() {
-  const { setSearchOpen, setSearchQuery, state, selectThread, t } = useApp();
+  const { openModal, setSearchOpen, setSearchQuery, state, selectThread, t } = useApp();
   const navigate = useNavigate();
   const deferredQuery = useDeferredValue(state.ui.searchQuery);
   const results = buildSearchResults(state, deferredQuery);
 
-  const handleResult = (targetPage: string, targetId?: string) => {
+  const handleResult = (result: SearchResult) => {
+    const { targetPage, targetId } = result;
+
     if (targetPage === 'profile' && targetId) {
       navigate(`/profile/${targetId}`);
     } else if (targetPage === 'messages') {
       if (targetId) selectThread(targetId);
       navigate('/messages');
+    } else if (result.type === 'post' && targetId) {
+      navigate('/feed');
+      openModal({ type: 'postDetails', postId: targetId });
+    } else if (result.type === 'task' && targetId) {
+      navigate('/tasks');
+      openModal({ type: 'taskDetails', taskId: targetId });
+    } else if (result.type === 'notice' && targetId) {
+      navigate('/notices');
+      openModal({ type: 'noticeDetails', noticeId: targetId });
+    } else if (result.type === 'forum' && targetId) {
+      navigate('/forum');
+      openModal({ type: 'forumTopic', topicId: targetId });
     } else {
       navigate(`/${targetPage}`);
     }
@@ -65,7 +80,7 @@ export function SearchBar() {
                   key={result.id}
                   type="button"
                   className="search-result"
-                  onClick={() => handleResult(result.targetPage, result.targetId)}
+                  onClick={() => handleResult(result)}
                 >
                   <span className="search-result__icon">
                     <Icon size={16} />

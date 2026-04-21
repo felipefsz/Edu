@@ -386,6 +386,12 @@ html[data-transparency='solid'] .floating-top-button {
   flex-shrink: 0;
 }
 
+.toolbar-button--danger {
+  color: var(--red);
+  border-color: rgba(240, 80, 104, 0.25);
+  background: rgba(240, 80, 104, 0.1);
+}
+
 .notification-bubble {
   position: absolute;
   top: calc(100% - 2px);
@@ -636,6 +642,21 @@ html[data-transparency='solid'] .floating-top-button {
   font-family: 'JetBrains Mono', monospace;
 }
 
+.tag-pill--button {
+  cursor: pointer;
+}
+
+button.tag-pill {
+  font: inherit;
+}
+
+.feed-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+}
+
 .status-pill--accent {
   background: rgba(240, 80, 104, 0.12);
   color: var(--red);
@@ -703,9 +724,24 @@ html[data-transparency='solid'] .floating-top-button {
 }
 
 .post-card__text {
+  display: block;
   margin: 0;
   white-space: pre-wrap;
   line-height: 1.65;
+}
+
+.post-open-body {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.post-open-body:hover {
+  color: var(--accent-2);
 }
 
 .feed-translate-row {
@@ -730,6 +766,17 @@ html[data-transparency='solid'] .floating-top-button {
   background: var(--surface-2);
   display: grid;
   gap: 0.35rem;
+}
+
+.quoted-post--button {
+  width: 100%;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.quoted-post--button:hover {
+  border-color: rgba(99, 116, 246, 0.4);
 }
 
 .quoted-post__eyebrow {
@@ -1421,6 +1468,71 @@ html[data-transparency='solid'] .floating-top-button {
   flex-wrap: wrap;
   gap: 0.6rem;
   margin-top: 0.75rem;
+}
+
+.profile-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.75rem;
+}
+
+.profile-tab {
+  flex: 1 1 130px;
+  min-height: 54px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  color: var(--text-2);
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+  padding: 0.55rem;
+  transition: transform var(--motion-fast), border-color var(--motion-fast), color var(--motion-fast), background var(--motion-fast);
+}
+
+.profile-tab:hover {
+  transform: translateY(-1px);
+  border-color: rgba(99, 116, 246, 0.36);
+}
+
+.profile-tab--active {
+  color: var(--accent);
+  background: rgba(99, 116, 246, 0.12);
+  border-color: rgba(99, 116, 246, 0.3);
+}
+
+.profile-tab small {
+  color: var(--text-3);
+}
+
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.8rem;
+}
+
+.badge-card {
+  min-height: 120px;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(245, 165, 28, 0.28);
+  background:
+    radial-gradient(circle at top left, rgba(245, 165, 28, 0.18), transparent 42%),
+    var(--surface-2);
+  color: inherit;
+  text-align: left;
+  display: grid;
+  align-content: end;
+  gap: 0.35rem;
+}
+
+.badge-card strong {
+  color: var(--yellow);
+}
+
+.badge-card small {
+  color: var(--text-2);
 }
 
 .profile-inline-metrics div {

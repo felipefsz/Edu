@@ -1,11 +1,15 @@
 import { useParams } from 'react-router-dom';
+import { useState } from 'react';
 import { PostCard } from '../components/PostCard';
 import { useApp } from '../app/AppState';
 import { getAverageGrade, getProfilePosts, getUserById } from '../utils/selectors';
 
+type ProfileTab = 'posts' | 'saved' | 'followers' | 'following' | 'badges';
+
 export function ProfilePage() {
   const { userId } = useParams();
-  const { currentUser, state, toggleFollow } = useApp();
+  const { currentUser, openModal, state, toggleFollow } = useApp();
+  const [activeTab, setActiveTab] = useState<ProfileTab>('posts');
   const profileUser = getUserById(state, userId);
   const posts = getProfilePosts(state, userId);
   const isOwnProfile = currentUser?.id === profileUser?.id;
@@ -14,6 +18,35 @@ export function ProfilePage() {
   if (!profileUser) {
     return <div className="panel-card">User not found.</div>;
   }
+
+  const savedPosts = state.posts.filter((post) => post.savedByUserIds.includes(profileUser.id));
+  const followerUsers = profileUser.followerIds
+    .map((id) => getUserById(state, id))
+    .filter(Boolean);
+  const followingUsers = profileUser.followingIds
+    .map((id) => getUserById(state, id))
+    .filter(Boolean);
+  const tabItems: Array<{ id: ProfileTab; label: string; count: number }> = [
+    { id: 'posts', label: 'Posts', count: posts.length },
+    { id: 'saved', label: 'Salvos', count: savedPosts.length },
+    { id: 'followers', label: 'Seguidores', count: followerUsers.length },
+    { id: 'following', label: 'Seguindo', count: followingUsers.length },
+    { id: 'badges', label: 'Conquistas', count: profileUser.badges.length },
+  ];
+
+  const renderPeople = (users: typeof followerUsers) => (
+    <div className="stack-gap-sm">
+      {users.length ? users.map((user) => user ? (
+        <button key={user.id} className="person-row" type="button" onClick={() => openModal({ type: 'profilePreview', userId: user.id })}>
+          <span className="avatar-pill" style={{ background: user.avatarTone }}>{user.name.slice(0, 1)}</span>
+          <span>
+            <strong>{user.name}</strong>
+            <small>{user.role === 'teacher' ? 'Professor' : `Turma ${user.classroom}`}</small>
+          </span>
+        </button>
+      ) : null) : <div className="empty-panel">Nada para mostrar ainda.</div>}
+    </div>
+  );
 
   return (
     <div className="stack-gap">
@@ -62,9 +95,36 @@ export function ProfilePage() {
         </div>
       </section>
 
+      <section className="panel-card profile-tabs">
+        {tabItems.map((tab) => (
+          <button
+            key={tab.id}
+            className={activeTab === tab.id ? 'profile-tab profile-tab--active' : 'profile-tab'}
+            type="button"
+            onClick={() => setActiveTab(tab.id)}
+          >
+            <span>{tab.label}</span>
+            <small>{tab.count}</small>
+          </button>
+        ))}
+      </section>
+
       <section className="page-grid page-grid--feed">
         <div className="stack-gap">
-          {posts.length ? posts.map((post) => <PostCard key={post.id} post={post} />) : <div className="panel-card">No posts yet.</div>}
+          {activeTab === 'posts' && (posts.length ? posts.map((post) => <PostCard key={post.id} post={post} />) : <div className="panel-card">Nenhum post ainda.</div>)}
+          {activeTab === 'saved' && (savedPosts.length ? savedPosts.map((post) => <PostCard key={post.id} post={post} />) : <div className="panel-card">Nenhum post salvo ainda.</div>)}
+          {activeTab === 'followers' ? renderPeople(followerUsers) : null}
+          {activeTab === 'following' ? renderPeople(followingUsers) : null}
+          {activeTab === 'badges' ? (
+            <section className="badge-grid">
+              {profileUser.badges.length ? profileUser.badges.map((badge) => (
+                <button key={badge} className="badge-card" type="button">
+                  <strong>{badge}</strong>
+                  <small>Conquista desbloqueada no percurso social.</small>
+                </button>
+              )) : <div className="empty-panel">Nenhuma conquista ainda.</div>}
+            </section>
+          ) : null}
         </div>
         <aside className="stack-gap">
           <section className="panel-card">

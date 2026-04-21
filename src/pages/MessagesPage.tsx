@@ -18,6 +18,12 @@ export function MessagesPage() {
   const activeThread = getThreadById(state, state.ui.activeThreadId);
   const members = getThreadMembers(state, state.ui.activeThreadId);
 
+  const sendCurrentMessage = () => {
+    if (!activeThread) return;
+    sendMessage(activeThread.id, messageBody);
+    setMessageBody('');
+  };
+
   useEffect(() => {
     if (!state.ui.activeThreadId && summaries.length) {
       selectThread(summaries[0].id);
@@ -101,17 +107,18 @@ export function MessagesPage() {
             className="ui-input"
             value={messageBody}
             onChange={(event) => setMessageBody(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                sendCurrentMessage();
+              }
+            }}
             placeholder="Write a message..."
           />
           <button
             className="solid-button"
             type="button"
-            onClick={() => {
-              if (activeThread) {
-                sendMessage(activeThread.id, messageBody);
-                setMessageBody('');
-              }
-            }}
+            onClick={sendCurrentMessage}
           >
             Send
           </button>
@@ -129,7 +136,7 @@ export function MessagesPage() {
             {currentRole === 'teacher' || activeThread.permissions.membersVisibleToStudents ? (
               <div className="member-list">
                 {members.map((member: User) => (
-                  <div key={member.id} className="person-row person-row--static">
+                  <button key={member.id} className="person-row" type="button" onClick={() => openModal({ type: 'profilePreview', userId: member.id })}>
                     <span className="avatar-pill" style={{ background: member.avatarTone }}>
                       {member.name.slice(0, 1)}
                     </span>
@@ -137,7 +144,7 @@ export function MessagesPage() {
                       <strong>{member.name}</strong>
                       <small>{member.role === 'teacher' ? 'Can edit' : 'Read / participate'}</small>
                     </span>
-                  </div>
+                  </button>
                 ))}
               </div>
             ) : (
